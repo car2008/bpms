@@ -1,4 +1,5 @@
 <%@ page import="com.capitalbiotech.bpms.Project"%>
+<g:set var="today" value="${new Date()}" />
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -231,7 +232,7 @@
 						<tbody>
 							<g:form id="form" name="myForm"  action="exportToExcel" >
 							<g:each in="${projectInstanceList}" var="projectInstance">
-							<g:if test="${projectInstance?.analySendDate > projectInstance?.innerDueDate && projectInstance?.innerDueDate }">
+							<g:if test="${(projectInstance?.analySendDate > projectInstance?.innerDueDate && projectInstance?.innerDueDate) || (today > projectInstance?.innerDueDate && projectInstance?.analySendDate==null)}">
 							     <tr id="projectTr" bgcolor="F4B4AF">
 							</g:if>
 							<g:else>
@@ -528,7 +529,7 @@
 			<!--/span-->
 			<!-- /span -->
 			<div class="span3" style="width:15%;">
-				<IFRAME  scrolling="no" width="100%" height="150" frameBorder="0" id="frmright" name="frmright" src="showduetime"  allowTransparency="true"></IFRAME> 
+				<IFRAME  scrolling="no" width="100%" height="200" frameBorder="0" id="frmright" name="frmright" src="showduetime"  allowTransparency="true"></IFRAME> 
 			</div>
 			<!--/span-->
 		</div>
@@ -621,27 +622,8 @@
 	</div>
 	
 	<script>
-		<%--dataTables配置文件 --%>
-		$(function(){
-			var table = $('#example').DataTable({
-	             "dom": 't<"bottom">',
-	             "bSort": false,
-	              scrollX:        true,
-                  scrollCollapse: true,
-                  fixedColumns:   {
-	                 leftColumns: 5
-	              },
-	         });
-	         $('#secondRow td input').each(function(){
-   	             $(this).on( 'keyup', function () {
-   	                 table.search( this.value ).draw();
- 	          	 });
-   	         });
-		});
+		
 		 
-    </script>
-	
-	<script>
 		function restoreSql(){
 			// 每发一个请求，应该创建一个xhr对象 
 	   		var xhr = new XMLHttpRequest();
@@ -742,6 +724,23 @@
 		}
 		<%--复选框的全选与反选
 		选择导出项目与列--%>
+		<%--dataTables配置文件 --%>
+		$(function(){
+			var table = $('#example').DataTable({
+	             "dom": 't<"bottom">',
+	             "bSort": false,
+	              scrollX:        true,
+                  scrollCollapse: true,
+                  fixedColumns:   {
+	                 leftColumns: 5
+	              },
+	         });
+	         $('#secondRow td input').each(function(){
+   	             $(this).on( 'keyup', function () {
+   	                 table.search( this.value ).draw();
+ 	          	 });
+   	         });
+		});
 	</script>
 </body>
 </html>

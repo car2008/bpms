@@ -158,6 +158,25 @@
 		<input type="text" name="analyStartDate" id="analyStartDate" ${disabledValue} data-date="${analyStartDate}" data-date-format="yyyy-mm-dd" value="${analyStartDate}" />
 	</div>
 </div>
+<div class="control-group ${hasErrors(bean: projectInstance, field: 'analySendDate', 'error')}">
+	<label class="control-label" for="analySendDate"><g:message
+				code="project.analySendDate.label" /></label>
+	<div class="controls">
+		<input type="text" name="analySendDate" id="analySendDate" ${disabledValue} data-date="${analySendDate}" data-date-format="yyyy-mm-dd" value="${analySendDate}" />
+	</div>
+</div>
+<div class="control-group ${hasErrors(bean: projectInstance, field: 'analySendWay', 'error')}">
+	<label class="control-label" for="analySendWay"><g:message code="project.analySendWay.label" /></label>
+	<div class="controls">
+		<select id="analySendWay" name="analySendWay" >
+			<g:each in="${Project.constraints.analySendWay.inList}" var="analySendWay">
+				<option value="${analySendWay}" ${projectInstance?.analySendWay == analySendWay ? 'selected' : ''} ${disabledValue}>
+					<g:message code="project.way.${analySendWay}.label" />
+				</option>
+			</g:each>
+		</select>
+	</div>
+</div>
 <div class="control-group ${hasErrors(bean: projectInstance, field: 'metaSendData', 'error')}">
 	<label class="control-label" for="metaSendData"><g:message
 				code="project.metaSendData.label" /></label>
@@ -217,25 +236,7 @@
 		</select>
 	</div>
 </div>
-<div class="control-group ${hasErrors(bean: projectInstance, field: 'analySendDate', 'error')}">
-	<label class="control-label" for="analySendDate"><g:message
-				code="project.analySendDate.label" /></label>
-	<div class="controls">
-		<input type="text" name="analySendDate" id="analySendDate" ${disabledValue} data-date="${analySendDate}" data-date-format="yyyy-mm-dd" value="${analySendDate}" />
-	</div>
-</div>
-<div class="control-group ${hasErrors(bean: projectInstance, field: 'analySendWay', 'error')}">
-	<label class="control-label" for="analySendWay"><g:message code="project.analySendWay.label" /></label>
-	<div class="controls">
-		<select id="analySendWay" name="analySendWay" >
-			<g:each in="${Project.constraints.analySendWay.inList}" var="analySendWay">
-				<option value="${analySendWay}" ${projectInstance?.analySendWay == analySendWay ? 'selected' : ''} ${disabledValue}>
-					<g:message code="project.way.${analySendWay}.label" />
-				</option>
-			</g:each>
-		</select>
-	</div>
-</div>
+
 <div class="control-group ${hasErrors(bean: projectInstance, field: 'fileName', 'error')}">
 	<label class="control-label" for="fileName"><g:message code="project.fileName.label" /></label>
 	<div class="controls">
