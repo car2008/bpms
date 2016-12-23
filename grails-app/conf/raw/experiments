@@ -1,0 +1,19 @@
+code	title	description	END
+mRNA	mRNA		END
+miRNA	miRNA		END
+Meth	Meth		END
+ChIP	ChIP		END
+Pro	Pro		END
+Exome	Exome		END
+CSP	CSP		END
+CNV	CNV		END
+CGH	CGH		END
+SNP	SNP		END
+lncRNA	lncRNA		END
+smallRNA	smallRNA		END
+MeDIP	MeDIP		END
+DNA	DNA		END
+CSS	CSS		END
+circRNA	circRNA		END
+single cell	single cell		END
+SNP+CNV	SNP+CNV		END

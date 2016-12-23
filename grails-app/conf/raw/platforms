@@ -1,0 +1,15 @@
+code	title	description	END
+RNA_Affymetrix	RNA芯片平台（Affymetrix）		END
+RNA_Agilent	RNA芯片平台（Agilent）		END
+DNA_Agilent	DNA芯片平台（Agilent）		END
+RNA_CBC	RNA芯片平台（CBC）		END
+RNA_ABI	RNA芯片平台（ABI定量）		END
+RNA_RayBio	RNA芯片平台（RayBio）		END
+Illumina_seq	Illumina测序平台		END
+Illumina_array	Illumina芯片平台		END
+Sequenom_plat	Sequenom平台		END
+DNA_Affymetrix	DNA芯片平台（Affymetrix）		END
+PROTEOMICS	蛋白质组学平台		END
+HLA_Ion_Torrent	HLA服务部（Ion Torrent平台）		END
+Reagent_Technology	试剂技术部		END
+Union_Analysis	联合分析		END
