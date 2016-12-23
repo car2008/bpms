@@ -169,9 +169,9 @@ class ProjectController {
 				def projectInstanceList
 				def projectInstanceTotal
 				//if(!params.projectInstanceTotal){
-					projectInstanceList = Project.executeQuery("SELECT project FROM Project project WHERE title like '%"+q+"%' OR contract like '%"+q+"%' OR customerUnit like '%"+q+"%' OR customerName like '%"+q+"%' OR species like '%"+q+"%' OR k3number like '%"+q+"%' OR information like '%"+q+"%' OR salesman like '%"+q+"%'"+"ORDER BY project.${params.sort} ${params.order}",
+					projectInstanceList = Project.executeQuery("SELECT project FROM Project project WHERE contract like '%"+q+"%' OR customerUnit like '%"+q+"%' OR customerName like '%"+q+"%' OR species like '%"+q+"%' OR k3number like '%"+q+"%' OR information like '%"+q+"%' OR salesman like '%"+q+"%'"+"ORDER BY project.${params.sort} ${params.order}",
 						[offset: params.offset, max:params.max])
-					def projectInstanceTotalList = Project.executeQuery("SELECT project FROM Project project WHERE title like '%"+q+"%' OR contract like '%"+q+"%' OR customerUnit like '%"+q+"%' OR customerName like '%"+q+"%' OR species like '%"+q+"%' OR k3number like '%"+q+"%' OR information like '%"+q+"%' OR salesman like '%"+q+"%'"+"ORDER BY project.${params.sort} ${params.order}")
+					def projectInstanceTotalList = Project.executeQuery("SELECT project FROM Project project WHERE contract like '%"+q+"%' OR customerUnit like '%"+q+"%' OR customerName like '%"+q+"%' OR species like '%"+q+"%' OR k3number like '%"+q+"%' OR information like '%"+q+"%' OR salesman like '%"+q+"%'"+"ORDER BY project.${params.sort} ${params.order}")
 					projectInstanceTotal = projectInstanceTotalList.size()
 				/*}else{
 					projectInstanceTotal = params.projectInstanceTotal
@@ -201,6 +201,23 @@ class ProjectController {
 					
 					def currentUser = springSecurityService.currentUser
 					
+					def remaindingDayMap = [:]
+					projectInstanceList?.each { projectInstance ->
+						if(!projectInstance.innerDueDate || "".equals(projectInstance.innerDueDate) ){
+							remaindingDayMap[projectInstance.id] = ""
+						}else{
+							def innerDueDate=projectInstance.innerDueDate
+							println innerDueDate
+							def currentDate=Util.parseSimpleDate(Util.getCurrentDateString())
+							def remaindingDay=(innerDueDate.getTime()-currentDate.getTime())/86400000
+							if(remaindingDay<0){
+								
+							}else{
+								remaindingDayMap[projectInstance.id] = remaindingDay
+							}
+						}
+					}
+					
 					def searchProjectInstanceTotal=projectInstanceTotal
 					def myProjectInstanceTotal = Project.executeQuery("SELECT COUNT(DISTINCT project), project FROM Project project LEFT JOIN project.supervisors supervisor LEFT JOIN project.analysts analyst LEFT JOIN project.sellers seller LEFT JOIN project.spliters spliter WHERE supervisor = :user OR analyst = :user OR seller = :user OR spliter = :user",
 					[user: currentUser])[0][0]
@@ -225,7 +242,8 @@ class ProjectController {
 						sort:sort,
 						itemNum:itemNum,
 						searchResult: true,
-						searchProjectInstanceTotal:searchProjectInstanceTotal
+						searchProjectInstanceTotal:searchProjectInstanceTotal,
+						remaindingDayMap:remaindingDayMap
 						]
 				}
 				
@@ -264,10 +282,12 @@ class ProjectController {
 			//def b=myProjectDueDateMap.get("OVER_DUEDATE")
 			//def c=myProjectDueDateMap.get("FINISHED_DUEDATE")
 			myProjectInstanceList?.each { projectInstance ->
-				if(projectInstance.analySendDate==null){
-					myProjectDueDateMap["UNFINISHED_DUEDATE"]+=1
-				}else if(projectInstance.innerDueDate && projectInstance.analySendDate && (projectInstance.analySendDate.getTime() > projectInstance.innerDueDate.getTime()) ){
+				if(projectInstance.innerDueDate && projectInstance.analySendDate && (projectInstance.analySendDate.getTime() > projectInstance.innerDueDate.getTime()) ){
 					myProjectDueDateMap["OVER_DUEDATE"]+=1
+				}else if(projectInstance.innerDueDate && !projectInstance.analySendDate && (System.currentTimeMillis() > projectInstance.innerDueDate.getTime()) ){
+					myProjectDueDateMap["OVER_DUEDATE"]+=1
+				}else if(projectInstance.analySendDate==null){
+					myProjectDueDateMap["UNFINISHED_DUEDATE"]+=1
 				}else if(projectInstance.analySendDate){
 					myProjectDueDateMap["FINISHED_DUEDATE"]+=1
 				}
