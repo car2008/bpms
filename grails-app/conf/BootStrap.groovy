@@ -404,9 +404,11 @@ class BootStrap {
 		
 		def propertiesList = readRawFile("worktimes")
 		propertiesList?.each { properties ->
-			properties['completer'] = User.findByUsername(properties['completer'])
+			//properties['completer'] = User.findByUsername(properties['completer'])
 			properties['project'] = Project.findByTitle(properties['project'])
-			properties['workcontents'] = Workcontent.findByCode(properties['workcontents'])
+			//properties['workcontents'] = Workcontent.findByCode(properties['workcontents'])
+			//properties['platforms'] = Workcontent.findByCode(properties['platforms'])
+			
 			if (!Util.isEmpty(properties['dateCreated'])) {
 				properties['dateCreated'] = Util.parseSimpleDateTime(properties['dateCreated'])
 			}
@@ -427,17 +429,37 @@ class BootStrap {
 			else {
 				properties['finishedDate'] = null
 			}
-			
-			def worktimeInstance = new Worktime(properties)
-			/*def workcontents = properties['workcontents']
+			def workcontents = properties['workcontents']
 			properties['workcontents'] = null
 			
+			def completers = properties['completers']
+			properties['completers'] = null
 			
-			System.out.println(worktimeInstance)
+			def platforms = properties['platforms']
+			properties['platforms'] = null
+			
+			def worktimeInstance = new Worktime(properties)
+			
 			workcontents.split(",").each { workcontentCode ->
 				def workcontentInstance = Workcontent.findByCode(workcontentCode)
-				worktimeInstance.workcontents.add(workcontentInstance)
-			}*/
+				if(workcontentInstance){
+					worktimeInstance.addToWorkcontents(workcontentInstance)
+				}
+			}
+			
+			completers.split(",").each { splitersUsername ->
+				def splitersInstance = User.findByUsername(splitersUsername)
+				if(splitersInstance){
+					worktimeInstance.addToCompleters(splitersInstance)
+				}
+			}
+			
+			platforms.split(",").each { platformCode ->
+				def platformInstance = Platform.findByCode(platformCode)
+				if(platformInstance){
+					worktimeInstance.addToPlatforms(platformInstance)
+				}
+			}
 			
 			if (worktimeInstance.hasErrors() || !worktimeInstance.save(flush: true)) {
 				worktimeInstance.errors?.each { error ->

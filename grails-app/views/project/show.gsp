@@ -18,7 +18,7 @@
 	
 	<div class="container-fluid">
 		<div class="row-fluid">
-			<div class="span6" style="width:1000px;">
+			<div class="span6" style="width:70%;">
 				<g:if test="${flash.message}">
 					<div class="alert alert-info">
 						${flash.message}
@@ -71,7 +71,7 @@
 			</div>
 			
 			<!-- /span -->
-			<div class="span3" style="width:200px;padding-left: 30px; border-left: 1px dashed #cccccc">
+			<div class="span3" style="width:10%;padding-left: 30px; border-left: 1px dashed #cccccc">
 				<g:each in="${trackInstanceList}" status="i" var="trackInstance">
 						<small><g:link controller="user" action="show" id="${trackInstance?.operator?.id}">${trackInstance?.operator?.name}</g:link></small>
 						<br/>
@@ -82,7 +82,7 @@
 				</g:each>
 			</div>
 			<!--/span-->
-			<div class="span3" style="width:200px;">
+			<div class="span3" style="width:12%;">
 				<g:render template="sidebar" />
 				
 				<g:if test="${projectInstance != null && projectInstance?.id != null && flag==true || projectInstance?.fileName != null}">

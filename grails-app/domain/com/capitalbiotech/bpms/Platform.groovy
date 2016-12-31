@@ -11,6 +11,7 @@ class Platform {
 	Date dateCreated
 	Date lastUpdated
 	Set<Project> projects
+	Set<Worktime> worktimes
 	
 	static constraints = {
 		code blank: false, unique: true
@@ -18,8 +19,8 @@ class Platform {
 		description nullable: true
 	}
 	
-	static hasMany = [projects: Project]
-	static belongsTo = Project
+	static hasMany = [projects: Project,worktimes: Worktime]
+	static belongsTo =[Project,Worktime]
 	
 	static mapping = {
 		description type:'text'

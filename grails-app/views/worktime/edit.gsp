@@ -36,7 +36,7 @@
 					<g:renderErrors bean="${projectInstance}" as="list" />
 				</div>
 			</g:hasErrors>
-			<g:form action="save" class="form-horizontal">
+			<g:form action="save" class="form-horizontal" method="post" enctype="multipart/form-data">
 				<g:hiddenField name="projectInstanceId" value="${projectInstance?.id}" />
 				<g:hiddenField name="projectInstanceVersion" value="${projectInstance?.version}" />
 				<g:hiddenField name="id" value="${worktimeInstance?.id}" />
@@ -57,5 +57,27 @@
 			</div>
 		</div>
 	</div>
+	<sec:ifAnyGranted roles="ROLE_ADMIN">
+		<!-- Modal -->
+		<div id="deleteModal" class="modal hide fade" tabindex="-1"
+			role="dialog" aria-labelledby="deleteModalLabel" aria-hidden="true">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal"
+					aria-hidden="true">×</button>
+				<h3 id="deleteModalLabel"><g:message code="warning.label" /></h3>
+			</div>
+			<div class="modal-body">
+				<p><g:message code="project.deletion.warning"/></p>
+			</div>
+			<div class="modal-footer">
+				<g:form action="delete" method="post" style="padding:0; margin:0">
+					<g:hiddenField name="projectInstanceId" value="${projectInstance?.id}" />
+					<g:hiddenField name="id" value="${worktimeInstance?.id}" />
+					<button class="btn" data-dismiss="modal" aria-hidden="true"><g:message code="cancel.label" /></button>
+					<button class="btn btn-danger"><g:message code="confirm.deletion.label" /></button>
+				</g:form>
+			</div>
+		</div>
+	</sec:ifAnyGranted>
 </body>
 </html>

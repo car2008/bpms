@@ -4,7 +4,7 @@
 <style type="text/css">
 #worktimeTable {
     vertical-align:middle;/*设置垂直居中*/
-    width:990px;
+    width:100%;
     margin-right: auto;
     margin-left: auto;
 }
@@ -52,12 +52,16 @@
 						</td>					    
 					 	<td>
 							<small>
-									${worktimeInstance?.workcontents.title}
+								<g:each in="${worktimeInstance?.workcontents}" var="workcontent">
+									${workcontent.title}
+								</g:each>
 							</small>
 						</td>
 						<td>
 							<small>
-									${worktimeInstance?.completer.name}
+								<g:each in="${worktimeInstance?.completers}" var="completer">
+									${completer.name}
+								</g:each>
 							</small>
 						</td>
 						<td>
@@ -86,15 +90,11 @@
 							</small>
 						</td>
 						<td>
-							<g:if test="${flag == true ||currentUser.username == worktimeInstance?.completer.username }">
+							<g:if test="${flag == true ||worktimeInstance?.completers.contains(currentUser) }">
 								<span>
+								
 										<g:link action="edit" params="[ id : worktimeInstance.id]">
 											<g:message code="default.button.edit.label" />
-										</g:link>
-								</span>
-								<span>
-										<g:link action="delete" params="[ id : worktimeInstance.id]">
-											<g:message code="default.button.delete.label" />
 										</g:link>
 								</span>
 							</g:if>

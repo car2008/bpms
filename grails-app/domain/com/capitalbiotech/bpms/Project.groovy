@@ -113,7 +113,6 @@ class Project {
         analysts: User,
         sellers: User,
 		spliters:User,
-		
     ]
 
     List<Message> getMessages() {

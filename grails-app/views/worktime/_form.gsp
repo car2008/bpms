@@ -1,16 +1,20 @@
 <%@ page import="com.capitalbiotech.bpms.Worktime" %>
 <g:set var="projectId" value="${projectInstance.id}" />
-<div class="control-group ${hasErrors(bean: projectInstance, field: 'title', 'error')}">
-	<label class="control-label" for="title"><g:message code="project.title.label" /></label>
-	<div class="controls">
-		<input type="text" name="title" id="title" readonly="readonly" value="${projectInstance?.title}"/>
-	</div>
-</div>
 <div class="control-group ${hasErrors(bean: projectInstance, field: 'contract', 'error')}">
 	<label class="control-label" for="contract"><g:message code="project.contract.label" /></label>
 	<div class="controls">
 		<input type="text" id="contract" name="contract" readonly="readonly" value="${projectInstance?.contract}"/>
 		<span class="help-inline"><g:message code="required.label" /></span>
+	</div>
+</div>
+<div class="control-group ${hasErrors(bean: projectInstance, field: 'platforms', 'error')}">
+	<label class="control-label" for="platforms"><g:message code="platform.label" /></label>
+	<div class="controls">
+		<select id="platforms" name="platforms" multiple data-placeholder=" ">
+			<g:each in="${platformInstanceList}" var="platformInstance">
+				<option value="${platformInstance?.id}" ${projectInstance?.platforms?.collect{it.id}?.contains(platformInstance.id) ? 'selected' : ''} >${platformInstance?.title}</option>
+			</g:each>
+		</select>
 	</div>
 </div>
 <div class="control-group ${hasErrors(bean: worktimeInstance, field: 'workcontents', 'error')}">
@@ -69,8 +73,7 @@ $(function(){
 	    autoclose:      true,
 	    todayHighlight: true,
 	});
-	
+	$("#platforms").chosen({});
 	$("#workcontents").chosen({});
-	$("#completer").chosen({});
 });
 </script>
