@@ -1,4 +1,4 @@
-<%@ page import="com.capitalbiotech.bpms.Project"%>
+<%@ page import="com.capitalbiotech.bpms.Project" %>
 <g:set var="today" value="${new Date()}" />
 <!DOCTYPE html>
 <html lang="en">
@@ -66,6 +66,21 @@
 }
 #secondRow td input{
 	width:100%;
+	height:28px;
+	padding:0 0;
+}
+#secondRow td select{
+	width:100%;
+	padding:0 0;	
+}
+#showduetimetable th,td{
+	padding-top:3%;
+	 padding-right: auto;
+    padding-left: 15px;
+	background-color:#F5F5F5;
+	font-family:"Times New Roman",Georgia,Serif;
+	 line-height:25px;
+	 font-size:10px;
 }
 </style>
 </head>
@@ -77,7 +92,7 @@
 	</div>
 	<div class="container-fluid">
 		<div class="row-fluid">
-			<div class="span9" style="width:80%;min-height:300px;overflow:auto;">
+			<div class="span9" style="width:84%;min-height:600px;overflow:auto;">
 				<g:if test="${flash.message}">
 					<div class="alert alert-info">
 						${flash.message}
@@ -112,7 +127,7 @@
 							<a href="javascript:;">搜索结果 / ${searchProjectInstanceTotal}</a>
 						</li>
 					</g:if>
-					<g:if test="${params.action == 'searchProject'}">
+					<g:if test="${params.action == 'searchProject' || params.action == 'searchProjectByColumn'|| params.action == 'searchProjectByDayNum'}">
 						<li>
 							<g:link action="list">和我相关的项目 / ${myProjectInstanceTotal}</g:link>
 						</li>
@@ -124,10 +139,6 @@
 						</li>
 					</g:if>
 				</ul>
-				<g:if test="${projectInstanceList == null || projectInstanceList.size() == 0}">
-					<p><g:message code='not.available.label' /></p>
-				</g:if>
-				<g:else>
 					<table id="example" class="table table-hover nowrap" style="width:5000px;">
 						<thead>
 							<tr>
@@ -136,18 +147,13 @@
 									<g:checkBox name="allChecked" id="ckAll" onclick="selectAll()" />全选
 									<g:checkBox name="invertChecked" id="ckInvert" onclick="selectInvert()" />反选
 								</th>
-								<g:sortableColumn property="title"
-									title="${message(code: 'project.title.label')}"  />
+								<%-- <g:sortableColumn property="title" title="${message(code: 'project.title.label')}"/> --%>
 								<g:sortableColumn property="projectCreateDate"
 									title="${message(code: 'project.projectCreateDate.label')}"  />
-								<g:sortableColumn property="contract"
-									title="${message(code: 'project.contract.label')}"  />
-								<g:sortableColumn property="information"
-									title="${message(code: 'project.information.label')}"  />
-								<g:sortableColumn property="level"
-									title="${message(code: 'project.level.label')}"  />
-								<g:sortableColumn property="status"
-									title="${message(code: 'project.status.label')}"  />
+								<th  >${message(code: 'project.contract.label')} </th>
+								<th  >${message(code: 'project.information.label')}</th>
+								<th  >${message(code: 'project.level.label')} </th>
+								<th  >${message(code: 'project.status.label')} </th>
 								<th  >${message(code: 'project.platforms.label')}</th>
 								<th  >${message(code: 'project.experiments.label')}</th>
 								<th  >${message(code: 'project.species.label')}</th>
@@ -159,43 +165,144 @@
 								<th  >${message(code: 'project.supervisors.label')}</th>
 								<th  >${message(code: 'project.analysts.label')}</th>
 								<th  >${message(code: 'project.sellers.label')}</th>
-								<g:sortableColumn property="analyStartDate"
-									title="${message(code: 'project.analyStartDate.label')}"  />
-								<g:sortableColumn property="analySendDate"
-									title="${message(code: 'project.analySendDate.label')}"  />
+								<th  >${message(code: 'project.analyStartDate.label')}</th>
+								<th  >${message(code: 'project.analySendDate.label')}</th>
 								<th  >${message(code: 'project.analySendWay.label')}</th>
 								<th  >${message(code: 'project.manHour.label')}</th>
 								<th  >${message(code: 'project.machineHour.label')}</th>
-								<g:sortableColumn property="dueTime"
-									title="${message(code: 'project.dueTime.label')}"  />
-								<g:sortableColumn property="innerDueDate"
-									title="${message(code: 'project.innerDueDate.label')}"  />
+								<th  >${message(code: 'project.dueTime.label')}</th>
+								<th  >${message(code: 'project.innerDueDate.label')}</th>
 								<th  >${message(code: 'project.overdueReason.label')}</th>
-								<g:sortableColumn property="isRemoted"
-									title="${message(code: 'project.isRemoted.label')}"  />
-								<g:sortableColumn property="backupDate"
-									title="${message(code: 'project.backupDate.label')}"  />
+								<th  >${message(code: 'project.isRemoted.label')}</th>
+								<th  >${message(code: 'project.backupDate.label')}</th>
 								<th  >${message(code: 'project.backupLocation.label')}</th>
-								<g:sortableColumn property="isControled"
-									title="${message(code: 'project.isControled.label')}"  />
+								<th  >${message(code: 'project.isControled.label')}</th>
 								<th  >${message(code: 'project.comment1.label')}</th>
 								<th  >${message(code: 'project.libraryBuildWay.label')}</th>
 								<th  >${message(code: 'project.readLength.label')}</th>
 								<th  >${message(code: 'project.readsNum.label')}</th>
 								<th  >${message(code: 'project.dataSize.label')}</th>
 								<th  >${message(code: 'project.spliters.label')}</th>
-								<g:sortableColumn property="metaSendData"
-									title="${message(code: 'project.metaSendData.label')}"  />
+								<th  >${message(code: 'project.metaSendData.label')}</th>
 								<th  >${message(code: 'project.metaSendWay.label')}</th>	
 							</tr>
+							<g:form id="searchProjectByColumn" name="searchProjectByColumn"  action="searchProjectByColumn" style="margin-bottom:0;">
 							<tr id="secondRow">
 								<td></td>
-						        <td><input type="text" class="form-control" ></td>
-						        <td><input type="text" class="form-control" ></td>
-						        <td><input type="text" class="form-control" ></td>
-						        <td><input type="text" class="form-control" ></td>
-						        <td><input type="text" class="form-control" > </td>
-						        <td><input type="text" class="form-control" ></td>
+						        <td>
+						        	<span><input type="text" name="beginSearchDate" id="beginSearchDate" value="${beginSearchDate}" style="width:75px;" onchange="searchDate(this.id)"/></span>
+								  ~ <span><input type="text" name="endSearchDate" id="endSearchDate" value="${endSearchDate}" style="width:75px;" onchange="searchDate(this.id)"/></span>
+						        </td>
+						        <td><input id="q2" name="q2" type="text" class="form-control"  data-index="3" value="${params.q2}" onchange="search(this.id)"/></td>
+						        <td><input id="q3" name="q3" type="text" class="form-control"  data-index="4" value="${params.q3}" onchange="search(this.id)"/></td>
+						        <td>
+						        	<select id="q4" name="q4" data-index="5" style="width:54px;" onchange="search(this.id)">
+						    			<option value="" selected></option>
+						    			<option value="LEVEL_LOW" ${"LEVEL_LOW".equals(params.q4) ? 'selected' : ''}  >
+											<g:message code="project.level.LEVEL_LOW.label" />
+										</option>
+										<option value="LEVEL_NORMAL" ${"LEVEL_NORMAL".equals(params.q4) ? 'selected' : ''}  >
+											<g:message code="project.level.LEVEL_NORMAL.label" />
+										</option>
+										<option value="LEVEL_HIGH" ${"LEVEL_HIGH".equals(params.q4) ? 'selected' : ''} >
+											<g:message code="project.level.LEVEL_HIGH.label" />
+										</option>
+						    		</select>
+					    		</td>
+						        <td>
+						        	<select id="q5" name="q5" data-index="6" style="width:96px;" onchange="search(this.id)">
+						    			<option value="" selected></option>
+						    			<option value="STATUS_WAIT" ${"STATUS_WAIT".equals(params.q5) ? 'selected' : ''} >
+											<g:message code="project.status.STATUS_WAIT.label" />
+										</option>
+										<option value="STATUS_DATA_ACCEPTED" ${"STATUS_DATA_ACCEPTED".equals(params.q5) ? 'selected' : ''} >
+											<g:message code="project.status.STATUS_DATA_ACCEPTED.label" />
+										</option>
+										<option value="STATUS_STARTED" ${"STATUS_STARTED".equals(params.q5) ? 'selected' : ''} >
+											<g:message code="project.status.STATUS_STARTED.label" />
+										</option>
+										<option value="STATUS_COMPLETED" ${"STATUS_COMPLETED".equals(params.q5) ? 'selected' : ''} >
+											<g:message code="project.status.STATUS_COMPLETED.label" />
+										</option>
+										<option value="STATUS_RELEASED" ${"STATUS_RELEASED".equals(params.q5) ? 'selected' : ''} >
+											<g:message code="project.status.STATUS_RELEASED.label" />
+										</option>
+										<option value="STATUS_ARCHIVED" ${"STATUS_ARCHIVED".equals(params.q5) ? 'selected' : ''} >
+											<g:message code="project.status.STATUS_ARCHIVED.label" />
+										</option>
+						    		</select>
+					    		</td>
+						    	<td>
+						    		<select id="q6" name="q6" data-index="7" style="width:196px;" onchange="search(this.id)">
+						    			<option value="" selected></option>
+						    			<g:each in="${platformInstanceList}" var="platformInstance">
+											<option value="${platformInstance?.code}" ${platformInstance?.code==params.q6 ? 'selected' : ''}  >${platformInstance?.title}</option>
+										</g:each>
+						    		</select>
+					    		</td>
+						    	<td>
+						    		<select id="q7" name="q7" data-index="8" style="width:92px;" onchange="search(this.id)">
+						    			<option value="" selected></option>
+						    			<g:each in="${experimentInstanceList}" var="experimentInstance">
+											<option value="${experimentInstance?.code}" ${experimentInstance?.code==params.q7 ? 'selected' : ''}>${experimentInstance?.title}</option>
+										</g:each>
+						    		</select>
+						    	</td>
+						    	<td>
+						    		<input id="q8" name="q8" type="text" class="form-control"  data-index="9" value="${params.q8}" onchange="search(this.id)"/>
+						    	</td>
+						    	<td></td>
+						    	<td>
+						    		<input id="q9" name="q9" type="text" class="form-control"  data-index="11" value="${params.q9}" onchange="search(this.id)"/>
+						    	</td>
+						    	<td>
+						    	</td>
+						    	<td >
+						    		<select id="q10" name="q10" data-index="13" style="width:122px;" onchange="search(this.id)">
+						    			<option value="" selected></option>
+						    			<g:each in="${analysisInstanceList}" var="analysisInstance">
+											<option value="${analysisInstance?.code}" ${analysisInstance?.code==params.q10 ? 'selected' : ''}>${analysisInstance?.title}</option>
+										</g:each>
+						    		</select>
+						    	</td>
+						    	<td>
+						    		<input id="q11" name="q11" type="text" class="form-control"  data-index="9" value="${params.q11}" onchange="search(this.id)"/>
+						    	</td>
+						    	<td>
+						    		<select id="q12" name="q12" data-index="13" style="width:122px;" onchange="search(this.id)">
+						    			<option value="" selected></option>
+						    			<g:each in="${supervisorInstanceList}" var="supervisorInstance">
+											<option value="${supervisorInstance?.username}" ${supervisorInstance?.username==params.q12 ? 'selected' : ''}>${supervisorInstance?.name}</option>
+										</g:each>
+						    		</select>
+						    	</td>
+						    	<td>
+						    		<select id="q13" name="q13" data-index="13" style="width:122px;" onchange="search(this.id)">
+						    			<option value="" selected></option>
+						    			<g:each in="${analystInstanceList}" var="analystInstance">
+											<option value="${analystInstance?.username}" ${analystInstance?.username==params.q13 ? 'selected' : ''}>${analystInstance?.name}</option>
+										</g:each>
+						    		</select>
+						    	</td>
+						    	<td>
+						    		<select id="q14" name="q14" data-index="13" style="width:122px;" onchange="search(this.id)">
+						    			<option value="" selected></option>
+						    			<g:each in="${sellerInstanceList}" var="sellerInstance">
+											<option value="${sellerInstance?.username}" ${sellerInstance?.username==params.q14 ? 'selected' : ''}>${sellerInstance?.name}</option>
+										</g:each>
+						    		</select>
+						    	</td>
+						    	<td>
+						    	</td>
+						    	<td>
+						    	</td>
+						    	<td></td>
+						    	<td></td>
+						    	<td></td>
+						    	<td>
+						    	</td>
+						    	<td>
+						    	</td>
 						    	<td></td>
 						    	<td></td>
 						    	<td></td>
@@ -209,25 +316,9 @@
 						    	<td></td>
 						    	<td></td>
 						    	<td></td>
-						    	<td></td>
-						    	<td></td>
-						    	<td></td>
-						    	<td></td>
-						    	<td></td>
-						    	<td></td>
-						    	<td></td>
-						    	<td></td>
-						    	<td></td>
-						    	<td></td>
-						    	<td></td>
-						    	<td></td>
-						    	<td></td>
-						    	<td></td>
-						    	<td></td>
-						    	<td></td>
-						    	<td></td>
-						    	<td></td>
-						    </tr>	
+						    	
+						    </tr>
+						    </g:form>
 						</thead>
 						<tbody>
 							<g:form id="form" name="myForm"  action="exportToExcel" >
@@ -258,13 +349,6 @@
 													</span>
 												</g:else>
 											</g:if>
-										</small>
-									</td>
-									<td  >
-										<small>
-											<g:link action="show" id="${projectInstance.id}">
-												${projectInstance?.title}
-											</g:link>
 										</small>
 									</td>
 									<td  >
@@ -494,44 +578,62 @@
 					<div class="pagination">
 						<bpms:paginate total="${projectInstanceTotal}" params="${params}" />
 					</div>
-				</g:else>
 			</div>
-			<!-- /span -->
-			<div class="span3" style="width:15%;">
+			<div class="span3" style="width:11%;">
 				<g:render template="sidebar"/> 
 			</div>
-			<!--/span-->
-			<!-- /span -->
-			<div class="span3" style="width:15%;">
-				<div class="well sidebar-nav">
-					<ul class="nav nav-list" >
-						<li class="nav-header">
-						  <div id="header">
-						    <g:form url='[controller: "project", action: "searchProject"]' id="searchableForm" name="searchableForm" method="get" style="margin-bottom:0;">
-						        <g:hiddenField name="lastAction" value="${params.action}" />
-						        <g:textField id="q" name="q" value="${params.q==null || params.q=='' ? '合同号/客户名/单位/k3号/物种' :params.q} " size="50"  onFocus="if(value==defaultValue){value='';this.style.color='#000'}" onBlur="if(!value){value=defaultValue; this.style.color='#999'}" style="width:95%;color:#999"/> 
-						    	<g:submitButton name="项目搜索"/>
-						    </g:form>
-						    <p/>
-						    <g:set var="haveQuery" value="${params.q?.trim()}" />
-						    <g:set var="haveResults" value="${searchResult}" />
-						    <g:if test="${haveQuery && !haveResults && !parseException}">
-						      <p style="color:red">Sorry!未找到 - <strong>${params.q}</strong></p>
-						    </g:if>
-						    <g:if test="${params.parseException}">
-						      <p style="color:red">请检查后重新输入</p>
-						    </g:if>
-						  </div>
-						</li> 
-					</ul>
-				</div>
+			<div class="span3" style="width:11%;background-color:#F5F5F5">
+				<table class="showduetimetable" >
+		<thead>
+			<tr>
+				<th>
+					<g:if test="${flag==true}">
+						<g:message code="showduetime.all.label" />
+					</g:if>
+					<g:else>
+						<g:message code="showduetime.my.label" />
+					</g:else>
+				</th>
+			</tr>
+		</thead>
+		<tbody>
+			<tr>
+				<td>
+					<font style="color:green">已完成项目</font>:
+				</td>
+				<td>
+					${myProjectDueDateMap["FINISHED_DUEDATE"]}个
+				</td>
+			</tr>
+			<tr>
+				<td>
+					<font style="color:B94A48">过期的项目</font>:
+				</td>
+				<td>
+					${myProjectDueDateMap["OVER_DUEDATE"]}个
+				</td>
+			</tr>
+			<tr>
+				<td>
+					<font style="color:red">未完成项目</font>:
+				</td>
+				<td>
+					${myProjectDueDateMap["UNFINISHED_DUEDATE"]}个
+				</td>
+			</tr>
+			<tr>
+				<td>
+					<g:form url='[controller: "project", action: "searchProjectByDayNum"]' id="searchableDue" name="searchableDue" method="get" style="margin-bottom:0;">
+						<input type="text" id="daynum" name="daynum" style="width:30px;border:0px;text-align:center" value="${daynum}"></input>天内到期:
+					</g:form>
+				</td>
+				<td>
+					<input type="text" id="projectcount" name="projectcount" value="${projectCount}" style="width:20px;height:20px;border:0px;background-color:F5F5F5;text-align:center" readonly></input>个
+				</td>
+			</tr>
+		</tbody>
+	</table>
 			</div>
-			<!--/span-->
-			<!-- /span -->
-			<div class="span3" style="width:15%;">
-				<IFRAME  scrolling="no" width="100%" height="200" frameBorder="0" id="frmright" name="frmright" src="showduetime"  allowTransparency="true"></IFRAME> 
-			</div>
-			<!--/span-->
 		</div>
 		<div id="shade"></div>
 		<div id="Layer1">
@@ -544,7 +646,19 @@
 		  	<g:hiddenField name="max" value="${max}" />
 		  	<g:hiddenField name="sort" value="${sort}" />
 		  	<g:hiddenField name="lastAction" value="${params.action}" />
-		  	<g:hiddenField name="q" value="${params.q}" />
+		  	<g:hiddenField name="q2" value="${params.q2}" />
+		  	<g:hiddenField name="q3" value="${params.q3}" />
+		  	<g:hiddenField name="q4" value="${params.q4}" />
+		  	<g:hiddenField name="q5" value="${params.q5}" />
+		  	<g:hiddenField name="q6" value="${params.q6}" />
+		  	<g:hiddenField name="q7" value="${params.q7}" />
+		  	<g:hiddenField name="q8" value="${params.q8}" />
+		  	<g:hiddenField name="q9" value="${params.q9}" />
+		  	<g:hiddenField name="q10" value="${params.q10}" />
+		  	<g:hiddenField name="q11" value="${params.q11}" />
+		  	<g:hiddenField name="q12" value="${params.q12}" />
+		  	<g:hiddenField name="q13" value="${params.q13}" />
+		  	<g:hiddenField name="q14" value="${params.q14}" />
 		  	<table id="tableToExcel"  border="1">
 		  		<tr>
 				    <td><g:checkBox name="sub1" checked="false" value="title"/>&nbsp;项目编号</td>
@@ -552,7 +666,7 @@
 				    <td><g:checkBox name="sub1" checked="false" value="libraryBuildWay"/>&nbsp;建库方式</td>
 				</tr>
 				<tr>
-				    <td><g:checkBox name="sub1" checked="false" value="dateCreated"/>&nbsp;登记日期</td>
+				    <td><g:checkBox name="sub1" checked="false" value="projectCreateDate"/>&nbsp;登记日期</td>
 				    <td><g:checkBox name="sub1" checked="false" value="sellers"/>&nbsp;审核员</td>
 				    <td><g:checkBox name="sub1" checked="false" value="readLength"/>&nbsp;测序读长</td>
 				</tr>
@@ -622,8 +736,31 @@
 	</div>
 	
 	<script>
-		
-		 
+	    window.onload=function(){
+		   // alert(${itemNum})
+		   // alert(${projectItemList})
+		   // alert(123)
+		   // alert(myjson.dataList[0].information)
+		}
+	    function searchDate(id){
+	    	if(id=="endSearchDate"){
+				var beginSearchDate=document.getElementById("beginSearchDate").value
+				if(""==beginSearchDate){
+				}else{
+					search(id)
+				}
+			}
+	    	if(id=="beginSearchDate"){
+				var beginSearchDate=document.getElementById("endSearchDate").value
+				if(""==beginSearchDate){
+				}else{
+					search(id)
+				}
+			}
+		}
+		function search(id){
+			document.getElementById("searchProjectByColumn").submit()
+		}
 		function restoreSql(){
 			// 每发一个请求，应该创建一个xhr对象 
 	   		var xhr = new XMLHttpRequest();
@@ -724,23 +861,37 @@
 		}
 		<%--复选框的全选与反选
 		选择导出项目与列--%>
-		<%--dataTables配置文件 --%>
 		$(function(){
-			var table = $('#example').DataTable({
-	             "dom": 't<"bottom">',
-	             "bSort": false,
-	              scrollX:        true,
-                  scrollCollapse: true,
-                  fixedColumns:   {
-	                 leftColumns: 5
-	              },
-	         });
-	         $('#secondRow td input').each(function(){
-   	             $(this).on( 'keyup', function () {
-   	                 table.search( this.value ).draw();
- 	          	 });
-   	         });
+			$('#beginSearchDate').datepicker({
+			    format:         "yyyy-mm-dd",
+			    clearBtn:       true,
+			    language:       "zh-CN",
+			    autoclose:      true,
+			    todayHighlight: true,
+			});
+			$('#endSearchDate').datepicker({
+			    format:         "yyyy-mm-dd",
+			    clearBtn:       true,
+			    language:       "zh-CN",
+			    autoclose:      true,
+			    todayHighlight: true,
+			});
+			
 		});
+		document.getElementById("daynum").onblur=function(){
+			var val = document.getElementById('daynum');
+			if(!isNaN(val.value)){
+				var value = parseInt(document.getElementById('daynum').value);
+	            if(value > 0 && value < 21){
+					document.getElementById("searchableDue").submit()
+	            }else{
+	                alert('请输入1-20之间的正整数 ');
+					document.getElementById('daynum').value="";
+	            }
+			}else{
+			   alert('请输入1-20之间的正整数 ');
+			}
+		}
 	</script>
 </body>
 </html>

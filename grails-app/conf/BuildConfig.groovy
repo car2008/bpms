@@ -55,6 +55,6 @@ grails.project.dependency.resolution = {
         build ":tomcat:7.0.54"
         
         runtime ":resources:1.1.6"
-        
+		compile ":prototype:1.0"
     }
 }

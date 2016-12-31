@@ -19,7 +19,7 @@ class SendEmailAsynchronously {
 	public SendEmailAsynchronously() {
 	}
 	public SendEmailAsynchronously(def toEmail ,def mailObject,def emailBody) {
-		this.fromEmail = 'capitalbiotech@qq.com'
+		this.fromEmail = 'capitalbiotech_info@foxmail.com'
 		this.toEmail = toEmail
 		this.mailObject = mailObject
 		this.emailBody = generateContent(emailBody)
@@ -27,7 +27,7 @@ class SendEmailAsynchronously {
 	}
 	 
 	public SendEmailAsynchronously(def toEmail ,def mailObject,def emailBody,def attach) {
-		this.fromEmail = 'capitalbiotech@qq.com'
+		this.fromEmail = 'capitalbiotech_info@foxmail.com'
 		this.toEmail = toEmail
 		this.mailObject = mailObject
 		this.emailBody = generateContent(emailBody)

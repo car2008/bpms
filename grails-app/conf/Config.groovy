@@ -54,6 +54,8 @@ grails.resources.adhoc.patterns = [
 grails.views.default.codec = "none" // none, html, base64
 grails.views.gsp.encoding = "UTF-8"
 grails.converters.encoding = "UTF-8"
+grails.converters.json.default.deep = true  //最好是配合默认使用deep。
+grails.converters.default.circular.reference.behaviour = "INSERT_NULL"//官方文档描述grails的converters类在转换JSON或XML时默认是输出所有环型引用的对象，所以这里要把它改成“INSERT_NULL”，就是如果碰到环型引用，就输出NULL
 // enable Sitemesh preprocessing of GSP pages
 grails.views.gsp.sitemesh.preprocess = true
 // scaffolding templates configuration
@@ -133,15 +135,15 @@ grails.plugins.springsecurity.userLookup.authorityJoinClassName = 'com.capitalbi
 grails.plugins.springsecurity.authority.className = 'com.capitalbiotech.bpms.Role'
 
 //sendMail
-grails.mail.default.from = "capitalbiotech@qq.com"
+grails.mail.default.from = "capitalbiotech_info@foxmail.com"
 grails {
 	mail {
 		host = "smtp.qq.com"
 		//host = "pop3.capitalbiotech.com"
 		port=465
-		username = "capitalbiotech@qq.com"
+		username = "capitalbiotech_info@foxmail.com"
 		//password = "bajd0816101041"
-		password = "pejpnfglquyzbfdd"
+		password = "hgtsuflzsrpbcjbh"
 		props = ["mail.smtp.auth":"true",
 				"mail.smtp.socketFactory.port":"465",
 				"mail.smtp.socketFactory.class":"javax.net.ssl.SSLSocketFactory",

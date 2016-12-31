@@ -39,16 +39,7 @@ $(function(){
 		<g:message code="default.list.label" args="${[message(code: 'worktime.label')]}" />
 	</div>
 </div>
-<div class="worktimeList" style="margin-left:8%;width:80%;overflow:auto;">
-	<g:form id="searchByDate" name="searchByDate"  action="searchByDate" style="margin-bottom:0;">
-			<span><input type="text" name="beginSearchDate" id="beginSearchDate" value="${beginSearchDate}" style="width:75px;"/></span>
-			~ <span><input type="text" name="endSearchDate" id="endSearchDate" value="${endSearchDate}" style="width:75px;"/></span>
-			&nbsp;&nbsp;<span><input type="submit" id="search" name="search" value="按日期搜索" /></span>
-			&nbsp;&nbsp;<span><input style="width:110px;border:0;BACKGROUND-COLOR: transparent;" readOnly name="itemNum" value="共【${worktimeInstanceTotal}】条记录" /></span>
-			<g:if test="${worktimeInstanceTotalIdList}">
-				<span><g:link action="exportToExcel" params="[worktimeInstanceTotalIdList: worktimeInstanceTotalIdList]" >导出全部搜索结果</g:link></span>
-			</g:if>
-	</g:form>
+<div class="worktimeList" style="margin-left:6%;width:85%;min-height:600px;overflow:auto;">
 	<table id="worktimeTable" class="worktimeTable" cellPadding=15px cellSpacing=0px>
 		<thead>
 			<tr>
@@ -56,18 +47,77 @@ $(function(){
 					<g:checkBox name="allChecked" id="ckAll" onclick="selectAll()" />全选
 					<g:checkBox name="invertChecked" id="ckInvert" onclick="selectInvert()" />反选
 				</th>
-				<th>${message(code: 'worktime.project.label')}</th>
+				<th>${message(code: 'worktime.finishedDate.label')}</th>
 				<th>${message(code: 'project.contract.label')}</th>
+				<th>${message(code: 'project.samplesize.label')}</th>
 				<th>${message(code: 'project.batch.label')}</th>
 				<th>${message(code: 'project.platforms.label')}</th>
 				<th>${message(code: 'worktime.workcontents.label')}</th>
 				<th>${message(code: 'worktime.completer.label')}</th>
-				<th>${message(code: 'worktime.finishedDate.label')}</th>
 				<th>${message(code: 'worktime.workWay.label')}</th>
 				<th>${message(code: 'worktime.manHour.label')}</th>
 				<th>${message(code: 'worktime.machineHour.label')}</th>
 				<th>${message(code: 'worktime.comment2.label')}</th>
 			</tr>
+			<g:form id="searchWorktimeByColumn" name="searchWorktimeByColumn"  action="searchWorktimeByColumn" style="margin-bottom:0;">
+				<tr id="secondRow">
+					<td style="width:50px;"></td>
+					<td style="width:200px;">
+						<span><input type="text" name="beginSearchDate" id="beginSearchDate" value="${beginSearchDate}" style="width:75px;" onchange="searchDate(this.id)"/></span>
+					  ~ <span><input type="text" name="endSearchDate" id="endSearchDate" value="${endSearchDate}" style="width:75px;" onchange="searchDate(this.id)"/></span>
+					</td>
+					<td>
+			        	<input id="q2" name="q2" type="text" class="form-control"  style="width:55px;" value="${params.q2}" onchange="search(this.id)"/>
+			        </td>
+			        <td style="width:55px;"></td>
+			        <td></td>
+			        <td>
+			        	<select id="q4" name="q4" data-index="7" style="width:180px;" onchange="search(this.id)">
+			    			<option value="" selected></option>
+			    			<g:each in="${platformInstanceList}" var="platformInstance">
+								<option value="${platformInstance?.code}" ${platformInstance?.code==params.q4 ? 'selected' : ''}  >${platformInstance?.title}</option>
+							</g:each>
+			    		</select>
+			        	
+		    		</td>
+			        <td>
+			        	<select id="q5" name="q5" data-index="13" style="width:122px;" onchange="search(this.id)">
+						    <option value="" selected></option>
+			    			<g:each in="${workcontentInstanceList}" var="workcontentInstance">
+								<option value="${workcontentInstance?.code}" ${workcontentInstance?.code==params.q5 ? 'selected' : ''}>${workcontentInstance?.title}</option>
+							</g:each>
+						</select>
+		    		</td>
+			    	<td>
+			    		<select id="q6" name="q6" data-index="13" style="width:90px;" onchange="search(this.id)">
+			    			<option value="" selected></option>
+			    			<g:each in="${analystInstanceList}" var="analystInstance">
+								<option value="${analystInstance?.username}" ${analystInstance?.username==params.q6 ? 'selected' : ''}>${analystInstance?.name}</option>
+							</g:each>
+			    		</select>
+		    		</td>
+		    		<td>
+		    			<select id="q7" name="q7" data-index="6" style="width:96px;" onchange="search(this.id)">
+			    			<option value="" selected></option>
+			    			<option value="WAY_USUAL" ${"WAY_USUAL".equals(params.q7) ? 'selected' : ''}  >
+								<g:message code="worktime.way.WAY_USUAL.label" />
+							</option>
+							<option value="WAY_MAIL" ${"WAY_MAIL".equals(params.q7) ? 'selected' : ''}  >
+								<g:message code="worktime.way.WAY_MAIL.label" />
+							</option>
+							<option value="WAY_OUT" ${"WAY_OUT".equals(params.q7) ? 'selected' : ''} >
+								<g:message code="worktime.way.WAY_OUT.label" />
+							</option>
+							<option value="WAY_PHONE" ${"WAY_PHONE".equals(params.q7) ? 'selected' : ''} >
+								<g:message code="worktime.way.WAY_PHONE.label" />
+							</option>
+			    		</select>
+		    		</td>
+		    		<td></td>
+		    		<td></td>
+		    		<td></td>
+				</tr>
+			</g:form>
 		</thead>
 		<tbody>
 			<g:form id="form" name="myForm"  action="exportToExcel" >
@@ -81,16 +131,19 @@ $(function(){
 							</td>
 							<td>
 								<small>
-										<g:link controller="project" action="show" id="${worktimeInstance?.project.id}">
-												${worktimeInstance?.project.id}
-										</g:link>
+										<g:formatDate format="yyyy-MM-dd" date="${worktimeInstance?.finishedDate}" />
 								</small>
 							</td>
 							<td>
 								<small>
 										<g:link controller="project" action="show" id="${worktimeInstance?.project.id}">
-												${worktimeInstance?.project.contract}
+												${worktimeInstance?.contract}
 										</g:link>
+								</small>
+							</td>
+							<td>
+								<small>
+										${worktimeInstance?.project.samplesize}
 								</small>
 							</td>
 							<td>
@@ -100,7 +153,7 @@ $(function(){
 							</td>
 							<td>
 								<small>
-										<g:each in="${worktimeInstance?.project.platforms}" var="platformInstance" status="platformIndex">
+										<g:each in="${worktimeInstance.platforms}" var="platformInstance" status="platformIndex">
 											<g:if test="${platformIndex > 0}">
 												<br />
 											</g:if>
@@ -110,17 +163,16 @@ $(function(){
 							</td>					    
 						 	<td>
 								<small>
-										${worktimeInstance?.workcontents.title}
+									<g:each in="${worktimeInstance?.workcontents}" var="workcontent">
+										${workcontent.title}
+									</g:each>
 								</small>
 							</td>
 							<td>
 								<small>
-										${worktimeInstance?.completer.name}
-								</small>
-							</td>
-							<td>
-								<small>
-										<g:formatDate format="yyyy-MM-dd" date="${worktimeInstance?.finishedDate}" />
+									<g:each in="${worktimeInstance?.completers}" var="completer">
+										${completer.name}
+									</g:each>
 								</small>
 							</td>
 							<td>
@@ -147,6 +199,10 @@ $(function(){
 					</g:each>
 			<g:submitButton id="submit" name="submit" value="导出excel" />
 			&nbsp;&nbsp;<input type="submit" id="exportAll" name="exportAll" value="导出所有工时" />
+			&nbsp;&nbsp;<span><input style="width:110px;border:0;BACKGROUND-COLOR: transparent;" readOnly name="itemNum" value="共【${worktimeInstanceTotal}】条记录" /></span>
+			<g:if test="${worktimeInstanceTotalIdList}">
+				<span><g:link action="exportToExcel" params="[worktimeInstanceTotalIdList: worktimeInstanceTotalIdList]" >导出全部搜索结果</g:link></span>
+			</g:if>
 			</g:form>
 		</tbody>
 	</table>
@@ -155,6 +211,25 @@ $(function(){
 	<bpms:paginate total="${worktimeInstanceTotal}" params="${params}" />
 </div>
 	<script>
+		function searchDate(id){
+	    	if(id=="endSearchDate"){
+				var beginSearchDate=document.getElementById("beginSearchDate").value
+				if(""==beginSearchDate){
+				}else{
+					search(id)
+				}
+			}
+	    	if(id=="beginSearchDate"){
+				var beginSearchDate=document.getElementById("endSearchDate").value
+				if(""==beginSearchDate){
+				}else{
+					search(id)
+				}
+			}
+		}
+		function search(id){
+			document.getElementById("searchWorktimeByColumn").submit()
+		}
 		<%--复选框的全选与反选--%>
 		function selectInvert(){
 			document.getElementById("ckAll").checked =0;

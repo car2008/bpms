@@ -52,10 +52,13 @@ class ProjectController {
 		def order=params.order
 		def sort=params.sort
 		def itemNum='0'
+		if(params.itemNum ){
+			itemNum=params.itemNum
+		}
 		if(!params.searchProjectInstanceTotal){
 			params.searchProjectInstanceTotal='0'
 		}
-
+		
         render view: 'list', model: [projectInstanceList: projectInstanceList,
             projectInstanceTotal: projectInstanceTotal,
             myProjectInstanceTotal: myProjectInstanceTotal,
@@ -67,8 +70,21 @@ class ProjectController {
 			sort:sort,
 			itemNum:itemNum,
 			searchProjectInstanceTotal:params.searchProjectInstanceTotal,
-			remaindingDayMap:remaindingDayMap
-			]
+			remaindingDayMap:remaindingDayMap,
+			q2:params.q2,
+			q3:params.q3,
+			q4:params.q4,
+			q5:params.q5,
+			q6:params.q6,
+			q7:params.q7,
+			q8:params.q8,
+			q9:params.q9,
+			q10:params.q10,
+			q11:params.q11,
+			q12:params.q12,
+			q13:params.q13,
+			q14:params.q14,
+			]+ projectResource()+showduetime()
     }
 
     def list = {
@@ -142,11 +158,24 @@ class ProjectController {
 			sort:sort,
 			itemNum:itemNum,
 			searchProjectInstanceTotal:params.searchProjectInstanceTotal,
-			remaindingDayMap:remaindingDayMap
-			]
+			remaindingDayMap:remaindingDayMap,
+			q2:params.q2,
+			q3:params.q3,
+			q4:params.q4,
+			q5:params.q5,
+			q6:params.q6,
+			q7:params.q7,
+			q8:params.q8,
+			q9:params.q9,
+			q10:params.q10,
+			q11:params.q11,
+			q12:params.q12,
+			q13:params.q13,
+			q14:params.q14,
+			]+ projectResource()+showduetime()
     }
 	
-	def searchProject={
+	def searchProjectByDayNum={
 		params.max = Math.min(params.max ? params.int('max') : 10, 100)
 		
 		if (!params.offset) {
@@ -161,104 +190,463 @@ class ProjectController {
 		if(!params.itemNum){
 			params.itemNum='0'
 		}
-		def q = params.q?.trim()
-		if (!params.q ||q=="" || q.contains("k3")) {
-			redirect(action: params.lastAction, params: [itemNum:params.itemNum,order:params.order,max:params.max,sort:params.sort,offset:params.offset,q:q,parseException: true])
-		}else{
-			try {
-				def projectInstanceList
-				def projectInstanceTotal
-				//if(!params.projectInstanceTotal){
-					projectInstanceList = Project.executeQuery("SELECT project FROM Project project WHERE contract like '%"+q+"%' OR customerUnit like '%"+q+"%' OR customerName like '%"+q+"%' OR species like '%"+q+"%' OR k3number like '%"+q+"%' OR information like '%"+q+"%' OR salesman like '%"+q+"%'"+"ORDER BY project.${params.sort} ${params.order}",
-						[offset: params.offset, max:params.max])
-					def projectInstanceTotalList = Project.executeQuery("SELECT project FROM Project project WHERE contract like '%"+q+"%' OR customerUnit like '%"+q+"%' OR customerName like '%"+q+"%' OR species like '%"+q+"%' OR k3number like '%"+q+"%' OR information like '%"+q+"%' OR salesman like '%"+q+"%'"+"ORDER BY project.${params.sort} ${params.order}")
-					projectInstanceTotal = projectInstanceTotalList.size()
-				/*}else{
-					projectInstanceTotal = params.projectInstanceTotal
-					def projectInstanceIdStr = params.projectInstanceIdStr
-					if(projectInstanceIdStr.contains("_")){
-						def idList=projectInstanceIdStr.split("_")
-						idList?.each { projectId->
-							def pId=Integer.parseInt(projectId)
-							def projectInstance=Project.findById(pId)
-							projectInstanceList.add(projectInstance)
-						}
-					}else{
-						def pId=Integer.parseInt(projectInstanceIdStr)
-						def projectInstance=Project.findById(pId)
-						projectInstanceList.add(projectInstance)
-					}
-				}*/
-				
-				if(!projectInstanceList ){
-					redirect(action: params.lastAction, params: [itemNum:params.itemNum,order:params.order,max:params.max,sort:params.sort,offset:params.offset,q:q,searchResult: false,parseException: false])
-				}else{
-					def noticeInstanceMap = [:]
-					def noticeInstanceList = Notice.findAllByUserAndProjectInList(springSecurityService.currentUser, projectInstanceList)
-					noticeInstanceList?.each { noticeInstance ->
-						noticeInstanceMap[noticeInstance.project.id] = noticeInstance.unread
-					}
-					
-					def currentUser = springSecurityService.currentUser
-					
-					def remaindingDayMap = [:]
-					projectInstanceList?.each { projectInstance ->
-						if(!projectInstance.innerDueDate || "".equals(projectInstance.innerDueDate) ){
-							remaindingDayMap[projectInstance.id] = ""
-						}else{
-							def innerDueDate=projectInstance.innerDueDate
-							println innerDueDate
-							def currentDate=Util.parseSimpleDate(Util.getCurrentDateString())
-							def remaindingDay=(innerDueDate.getTime()-currentDate.getTime())/86400000
-							if(remaindingDay<0){
-								
-							}else{
-								remaindingDayMap[projectInstance.id] = remaindingDay
-							}
-						}
-					}
-					
-					def searchProjectInstanceTotal=projectInstanceTotal
-					def myProjectInstanceTotal = Project.executeQuery("SELECT COUNT(DISTINCT project), project FROM Project project LEFT JOIN project.supervisors supervisor LEFT JOIN project.analysts analyst LEFT JOIN project.sellers seller LEFT JOIN project.spliters spliter WHERE supervisor = :user OR analyst = :user OR seller = :user OR spliter = :user",
-					[user: currentUser])[0][0]
-					def allProjectInstanceTotal = Project.count()
-					def projectItemList=params.projectItemList
-					def offset=params.offset
-					def order=params.order
-					def sort=params.sort
-					def itemNum='0'
-					if(params.itemNum){
-						itemNum=params.itemNum
-					}
-					
-					render view: 'list', model: [projectInstanceList: projectInstanceList,
-						projectInstanceTotal: projectInstanceTotal,
-						myProjectInstanceTotal: myProjectInstanceTotal,
-						allProjectInstanceTotal: allProjectInstanceTotal,
-						noticeInstanceMap: noticeInstanceMap,
-						projectItemList:projectItemList,
-						offset:offset,
-						order:order,
-						sort:sort,
-						itemNum:itemNum,
-						searchResult: true,
-						searchProjectInstanceTotal:searchProjectInstanceTotal,
-						remaindingDayMap:remaindingDayMap
-						]
-				}
-				
-			} catch (Exception ex) {
-				redirect(action: params.lastAction, params: [itemNum:params.itemNum,order:params.order,max:params.max,sort:params.sort,offset:params.offset,q:params.q,parseException: true])
-			}
-		}
-	}
-	
-	def showduetime={
 		if(!params.daynum){
 			params.daynum = "5"
 		}
 		def daynum = Integer.parseInt(params.daynum)
 		try {
+			def projectInstanceTotal
+			def flag=false
+			def currentUser = springSecurityService.currentUser
+			def currentTime=Util.getCurrentDateString()
+			def searchTime1=System.currentTimeMillis()+daynum*24*60*60*1000
+			def searchTime=Util.dateParser1.format(new Date(searchTime1))
+			def projectCount=0
+			def projectInstanceList=new ArrayList<Project>()
+			def projectInstanceIdStr=new StringBuffer()
+			def curtime=Util.parseSimpleDate(currentTime)
+			def seatime=Util.parseSimpleDate(searchTime)
+			def beginTime=Util.dateParser2.format(new Date(curtime.getTime()))
+			def endTime=Util.dateParser2.format(new Date(seatime.getTime()))
+			
+			//println currentTime+"--"+searchTime
+			//println curtime
+			//println beginTime
+			/*def projectInstanceList1 = Project.executeQuery("SELECT project FROM Project project  WHERE inner_due_date BETWEEN :currentTime AND :searchTime",
+				[currentTime:currentTime,searchTime:searchTime])
+			println projectInstanceList1*/
+			def myProjectInstanceList
+			def authoritiesString=currentUser.getAuthoritiesString()
+			println authoritiesString
+			if(authoritiesString.contains("ROLE_SELLER")){
+				myProjectInstanceList=Project.list()
+				projectInstanceList = Project.executeQuery("SELECT DISTINCT(project) FROM Project project WHERE project.innerDueDate BETWEEN '"+beginTime+"' AND '"+endTime+"' ORDER BY project.${params.sort} ${params.order}",
+					[offset: params.offset, max:params.max])
+				flag=true
+			}else{
+				myProjectInstanceList = Project.executeQuery("SELECT DISTINCT project FROM Project project LEFT JOIN project.supervisors supervisor LEFT JOIN project.analysts analyst LEFT JOIN project.sellers seller LEFT JOIN project.spliters spliter WHERE supervisor = :user OR analyst = :user OR seller = :user OR spliter = :user ",
+				[user: currentUser])
+				projectInstanceList = Project.executeQuery("SELECT DISTINCT(project) FROM Project project LEFT JOIN project.supervisors supervisor LEFT JOIN project.analysts analyst LEFT JOIN project.sellers seller LEFT JOIN project.spliters spliter WHERE project.innerDueDate BETWEEN '"+beginTime+"' AND '"+endTime+"' "+"AND supervisor = :user OR analyst = :user OR seller = :user OR spliter = :user ORDER BY project.${params.sort} ${params.order}",
+					[user: currentUser], [offset: params.offset, max:params.max])
+			}
+			def myProjectDueDateMap=new HashMap<String,Integer>()
+			myProjectDueDateMap.put("UNFINISHED_DUEDATE", 0)
+			myProjectDueDateMap.put("OVER_DUEDATE", 0)
+			myProjectDueDateMap.put("FINISHED_DUEDATE", 0)
+			//def a=myProjectDueDateMap.get("UNFINISHED_DUEDATE")
+			//println a
+			//def b=myProjectDueDateMap.get("OVER_DUEDATE")
+			//def c=myProjectDueDateMap.get("FINISHED_DUEDATE")
+			myProjectInstanceList?.each { projectInstance ->
+				if(projectInstance.innerDueDate && projectInstance.analySendDate && (projectInstance.analySendDate.getTime() > projectInstance.innerDueDate.getTime()) ){
+					myProjectDueDateMap["OVER_DUEDATE"]+=1
+				}else if(projectInstance.innerDueDate && !projectInstance.analySendDate && (System.currentTimeMillis() > projectInstance.innerDueDate.getTime()) ){
+					myProjectDueDateMap["OVER_DUEDATE"]+=1
+				}else if(projectInstance.analySendDate==null){
+					myProjectDueDateMap["UNFINISHED_DUEDATE"]+=1
+				}else if(projectInstance.analySendDate){
+					myProjectDueDateMap["FINISHED_DUEDATE"]+=1
+				}
+				if(projectInstance.innerDueDate){
+					def innerduetime=projectInstance.innerDueDate.getTime()
+					if(innerduetime>=curtime.getTime() && innerduetime<=seatime.getTime()){
+						projectCount=projectCount+1
+					}
+				}
+			}
+			//if(!params.projectInstanceTotal){
+				//projectInstanceList = Project.executeQuery("SELECT project FROM Project project WHERE contract like '%"+q+"%' OR customerUnit like '%"+q+"%' OR customerName like '%"+q+"%' OR species like '%"+q+"%' OR k3number like '%"+q+"%' OR information like '%"+q+"%' OR level like '%"+q+"%' OR salesman like '%"+q+"%'"+"ORDER BY project.${params.sort} ${params.order}",
+				//	[offset: params.offset, max:params.max])
+			projectInstanceTotal = projectCount
+			/*}else{
+				projectInstanceTotal = params.projectInstanceTotal
+				def projectInstanceIdStr = params.projectInstanceIdStr
+				if(projectInstanceIdStr.contains("_")){
+					def idList=projectInstanceIdStr.split("_")
+					idList?.each { projectId->
+						def pId=Integer.parseInt(projectId)
+						def projectInstance=Project.findById(pId)
+						projectInstanceList.add(projectInstance)
+					}
+				}else{
+					def pId=Integer.parseInt(projectInstanceIdStr)
+					def projectInstance=Project.findById(pId)
+					projectInstanceList.add(projectInstance)
+				}
+			}*/
+			
+			if(!projectInstanceList ){
+				redirect(action: params.lastAction, params: [itemNum:params.itemNum,order:params.order,max:params.max,sort:params.sort,offset:params.offset,q:q,searchResult: false,parseException: false])
+			}else{
+				def noticeInstanceMap = [:]
+				def noticeInstanceList = Notice.findAllByUserAndProjectInList(springSecurityService.currentUser, projectInstanceList)
+				noticeInstanceList?.each { noticeInstance ->
+					noticeInstanceMap[noticeInstance.project.id] = noticeInstance.unread
+				}
+				
+				def remaindingDayMap = [:]
+				projectInstanceList?.each { projectInstance ->
+					if(!projectInstance.innerDueDate || "".equals(projectInstance.innerDueDate) ){
+						remaindingDayMap[projectInstance.id] = ""
+					}else{
+						def innerDueDate=projectInstance.innerDueDate
+						//println innerDueDate
+						def currentDate=Util.parseSimpleDate(Util.getCurrentDateString())
+						def remaindingDay=(innerDueDate.getTime()-currentDate.getTime())/86400000
+						if(remaindingDay<0){
+							
+						}else{
+							remaindingDayMap[projectInstance.id] = remaindingDay
+						}
+					}
+				}
+				
+				def searchProjectInstanceTotal=projectInstanceTotal
+				def myProjectInstanceTotal = Project.executeQuery("SELECT COUNT(DISTINCT project), project FROM Project project LEFT JOIN project.supervisors supervisor LEFT JOIN project.analysts analyst LEFT JOIN project.sellers seller LEFT JOIN project.spliters spliter WHERE supervisor = :user OR analyst = :user OR seller = :user OR spliter = :user",
+				[user: currentUser])[0][0]
+				def allProjectInstanceTotal = Project.count()
+				def projectItemList=params.projectItemList
+				def offset=params.offset
+				def order=params.order
+				def sort=params.sort
+				def itemNum='0'
+				if(params.itemNum){
+					itemNum=params.itemNum
+				}
+				
+				render view: 'list', model: [projectInstanceList: projectInstanceList,
+					projectInstanceTotal: projectInstanceTotal,
+					myProjectInstanceTotal: myProjectInstanceTotal,
+					allProjectInstanceTotal: allProjectInstanceTotal,
+					noticeInstanceMap: noticeInstanceMap,
+					projectItemList:projectItemList,
+					offset:offset,
+					order:order,
+					sort:sort,
+					itemNum:itemNum,
+					searchResult: true,
+					searchProjectInstanceTotal:searchProjectInstanceTotal,
+					remaindingDayMap:remaindingDayMap,
+					q2:params.q2,
+					q3:params.q3,
+					q4:params.q4,
+					q5:params.q5,
+					q6:params.q6,
+					q7:params.q7,
+					q8:params.q8,
+					q9:params.q9,
+					q10:params.q10,
+					q11:params.q11,
+					q12:params.q12,
+					q13:params.q13,
+					q14:params.q14,
+					projectCount:projectCount,
+					daynum:daynum,
+					projectInstanceIdStr:projectInstanceIdStr.toString(),
+					myProjectDueDateMap:myProjectDueDateMap,
+					flag:flag
+					]+ projectResource()
+			}
+			
+		} catch (Exception ex) {
+			ex.printStackTrace()
+			redirect(action: params.lastAction, params: [itemNum:params.itemNum,order:params.order,max:params.max,sort:params.sort,offset:params.offset,q:params.q,parseException: true])
+		}
+		
+	}
+	
+	def searchProjectByColumn={
+		params.max = Math.min(params.max ? params.int('max') : 10, 100)
+		
+		if (!params.offset) {
+			params.offset = 0
+		}
+		if (!params.order) {
+			params.order = 'DESC'
+		}
+		if (!params.sort) {
+			params.sort = 'dateCreated'
+		}
+		if(!params.itemNum){
+			params.itemNum='0'
+		}
+		def beginSearchDate=params.beginSearchDate
+		def endSearchDate=params.endSearchDate
+		def q2 = params.q2?.trim()
+		def q3 = params.q3?.trim()
+		def q4 = params.q4?.trim()
+		def q5 = params.q5?.trim()
+		def q6 = params.q6?.trim()
+		def q7 = params.q7?.trim()
+		def q8 = params.q8?.trim()
+		def q9 = params.q9?.trim()
+		def q10 = params.q10?.trim()
+		def q11 = params.q11?.trim()
+		def q12 = params.q12?.trim()
+		def q13 = params.q13?.trim()
+		def q14 = params.q14?.trim()
+		def stringBuf=new StringBuffer()
+		
+		try {
+			def projectInstanceList1=new ArrayList()
+			def projectInstanceList=new ArrayList()
+			def projectInstanceTotalList1=new ArrayList()
+			def projectInstanceTotalList=new ArrayList()
+			def projectInstanceTotal
+			def paramMapList1=new ArrayList()
+			def paramMapList=new ArrayList()
+			Map paramMap1=new HashMap()
+			Map paramMap2=new HashMap()
+			Map paramMap3=new HashMap()
+			
+			stringBuf.append("SELECT DISTINCT project FROM Project project ")
+			if(q6){
+				stringBuf.append("LEFT JOIN project.platforms platform ")
+			}
+			if(q7){
+				stringBuf.append("LEFT JOIN project.experiments experiment ")
+			}
+			if(q10){
+				stringBuf.append("LEFT JOIN project.analyses analyse ")
+			}
+			if(q12){
+				stringBuf.append("LEFT JOIN project.supervisors supervisor ")
+			}
+			if(q13){
+				stringBuf.append("LEFT JOIN project.analysts analyst ")
+			}
+			if(q14){
+				stringBuf.append("LEFT JOIN project.sellers seller ")
+			}
+			if(beginSearchDate && endSearchDate ||(q2||q3||q4||q5||q6||q7||q8||q9||q10||q11||q12||q13||q14)){
+				stringBuf.append("WHERE ")
+			}
+			if(beginSearchDate && endSearchDate){
+				stringBuf.append("project_create_date BETWEEN '"+beginSearchDate+"' AND '"+endSearchDate+"' ")
+			}
+			stringBuf.append(q2?"AND contract like '%"+q2+"%' ":"")
+			stringBuf.append(q3?"AND information like '%"+q3+"%' ":"")
+			stringBuf.append(q4?"AND level like '%"+q4+"%' ":"")
+			stringBuf.append(q5?"AND status like '%"+q5+"%' ":"")
+			if(q6){
+				def platform=Platform.findByCode(q6)
+				stringBuf.append("AND platform = :platform ")
+				paramMap1.put("platform", platform)
+			}
+			if(q7){
+				def experiment=Experiment.findByCode(q7)
+				stringBuf.append("AND experiment = :experiment ")
+				paramMap1.put("experiment", experiment)
+			}
+			stringBuf.append(q8?"AND species like '%"+q8+"%' ":"")
+			stringBuf.append(q9?"AND k3number like '%"+q9+"%' ":"")
+			if(q10){
+				def analyse=Analysis.findByCode(q10)
+				stringBuf.append("AND analyse = :analyse ")
+				paramMap1.put("analyse", analyse)
+			}
+			stringBuf.append(q11?"AND salesman like '%"+q11+"%' ":"")
+			if(q12){
+				def supervisor=User.findByUsername(q12)
+				stringBuf.append("AND supervisor = :supervisor ")
+				paramMap1.put("supervisor", supervisor)
+			}
+			if(q13){
+				def analyst=User.findByUsername(q13)
+				stringBuf.append("AND analyst = :analyst ")
+				paramMap1.put("analyst", analyst)
+			}
+			if(q14){
+				def seller=User.findByUsername(q14)
+				stringBuf.append("AND seller = :seller ")
+				paramMap1.put("seller", seller)
+			}
+			
+			def s1=stringBuf.toString()
+			if(s1.contains("WHERE AND")){
+				s1=s1.replaceFirst("AND","")
+			}
+			if(s1.endsWith("WHERE ")){
+				s1=s1.replaceFirst("WHERE","")
+			}
+			stringBuf.append("ORDER BY project.${params.sort} ${params.order} ")
+			def s2=stringBuf.toString()
+			if(s2.contains("WHERE AND")){
+				s2=s2.replaceFirst("AND","")
+			}
+			if(paramMap1){
+				projectInstanceTotalList = Project.executeQuery(s1,paramMap1)
+				paramMap1.put("offset",params.offset)
+				paramMap1.put("max",params.max)
+				projectInstanceList = Project.executeQuery(s2,paramMap1)
+			}else{
+				projectInstanceTotalList = Project.executeQuery(s1)
+				paramMap1.put("offset",params.offset)
+				paramMap1.put("max",params.max)
+				projectInstanceList = Project.executeQuery(s2,paramMap1)
+			}
+			/*def platform
+			if(q6){
+				platform=Platform.findByCode(q6)
+				if(projectInstanceList1){
+					projectInstanceList1.each{ projectInstance->
+						if(projectInstance.platforms.contains(platform)){
+							projectInstanceList.add(projectInstance)
+						}
+					}
+				}else if(!projectInstanceList1 && (q1||q2||q3||q4||q5||q8||q9)){
+				
+				}else{
+					projectInstanceList=Project.executeQuery("SELECT project FROM Project project LEFT JOIN project.platforms platform WHERE platform=:platform ",[platform:platform,offset: params.offset, max:params.max])
+				}
+				if(projectInstanceTotalList1){
+					projectInstanceTotalList1.each{ projectInstance->
+						if(projectInstance.platforms.contains(platform)){
+							projectInstanceTotalList.add(projectInstance)
+						}
+					}
+				}else if(!projectInstanceTotalList1 && (q1||q2||q3||q4||q5||q8||q9)){
+				
+				}else{
+					projectInstanceTotalList=Project.executeQuery("SELECT project FROM Project project LEFT JOIN project.platforms platform WHERE platform=:platform ",[platform:platform])
+				}
+			}else{
+				projectInstanceList.addAll(projectInstanceList1)
+				projectInstanceTotalList.addAll(projectInstanceTotalList1)
+			}*/
+			projectInstanceTotal = projectInstanceTotalList.size()
+			
+			/*if(q6 && q6!=null && !"".equals(q6)){
+				platform=Platform.findByCode(q6)
+				projectInstanceTotalList1.each{ projectInstance->
+					if(projectInstance.platforms.contains(platform)){
+						projectInstanceTotalList.add(projectInstance)
+					}
+				}
+			}else{
+				projectInstanceTotalList.addAll(projectInstanceTotalList1)
+			}*/
+			/*if(q6 && q6!=null && !"".equals(q6) && projectInstanceList1){
+				platform=Platform.findByCode(q6)
+				projectInstanceList1.each{ projectInstance->
+					if(projectInstance.platforms.contains(platform)){
+						projectInstanceList.add(projectInstance)
+					}
+				}
+			}else if(q6 && q6!=null && !"".equals(q6) && !projectInstanceList1){
+				projectInstanceList=Project.findByPlatforms()
+			}else{
+				projectInstanceList.addAll(projectInstanceList1)
+			}*/
+			println projectInstanceList
+			println projectInstanceTotal
+			//if(!params.projectInstanceTotal){
+				//projectInstanceList = Project.executeQuery("SELECT project FROM Project project WHERE contract like '%"+q+"%' OR customerUnit like '%"+q+"%' OR customerName like '%"+q+"%' OR species like '%"+q+"%' OR k3number like '%"+q+"%' OR information like '%"+q+"%' OR level like '%"+q+"%' OR salesman like '%"+q+"%'"+"ORDER BY project.${params.sort} ${params.order}",
+				//	[offset: params.offset, max:params.max])
+				//def projectInstanceTotalList = Project.executeQuery("SELECT project FROM Project project WHERE contract like '%"+q+"%' OR customerUnit like '%"+q+"%' OR customerName like '%"+q+"%' OR species like '%"+q+"%' OR k3number like '%"+q+"%' OR information like '%"+q+"%' OR level like '%"+q+"%' OR salesman like '%"+q+"%'"+"ORDER BY project.${params.sort} ${params.order}")
+				//projectInstanceTotal = projectInstanceTotalList.size()
+			/*}else{
+				projectInstanceTotal = params.projectInstanceTotal
+				def projectInstanceIdStr = params.projectInstanceIdStr
+				if(projectInstanceIdStr.contains("_")){
+					def idList=projectInstanceIdStr.split("_")
+					idList?.each { projectId->
+						def pId=Integer.parseInt(projectId)
+						def projectInstance=Project.findById(pId)
+						projectInstanceList.add(projectInstance)
+					}
+				}else{
+					def pId=Integer.parseInt(projectInstanceIdStr)
+					def projectInstance=Project.findById(pId)
+					projectInstanceList.add(projectInstance)
+				}
+			}*/
+			
+			//if(!projectInstanceList ){
+			//	redirect(action: params.lastAction, params: [itemNum:params.itemNum,order:params.order,max:params.max,sort:params.sort,offset:params.offset])
+			//}else{
+				def noticeInstanceMap = [:]
+				def noticeInstanceList = Notice.findAllByUserAndProjectInList(springSecurityService.currentUser, projectInstanceList)
+				noticeInstanceList?.each { noticeInstance ->
+					noticeInstanceMap[noticeInstance.project.id] = noticeInstance.unread
+				}
+				
+				def currentUser = springSecurityService.currentUser
+				
+				def remaindingDayMap = [:]
+				projectInstanceList?.each { projectInstance ->
+					if(!projectInstance.innerDueDate || "".equals(projectInstance.innerDueDate) ){
+						remaindingDayMap[projectInstance.id] = ""
+					}else{
+						def innerDueDate=projectInstance.innerDueDate
+						println innerDueDate
+						def currentDate=Util.parseSimpleDate(Util.getCurrentDateString())
+						def remaindingDay=(innerDueDate.getTime()-currentDate.getTime())/86400000
+						if(remaindingDay<0){
+							
+						}else{
+							remaindingDayMap[projectInstance.id] = remaindingDay
+						}
+					}
+				}
+				
+				def searchProjectInstanceTotal=projectInstanceTotal
+				def myProjectInstanceTotal = Project.executeQuery("SELECT COUNT(DISTINCT project), project FROM Project project LEFT JOIN project.supervisors supervisor LEFT JOIN project.analysts analyst LEFT JOIN project.sellers seller LEFT JOIN project.spliters spliter WHERE supervisor = :user OR analyst = :user OR seller = :user OR spliter = :user",
+				[user: currentUser])[0][0]
+				def allProjectInstanceTotal = Project.count()
+				def projectItemList=params.projectItemList
+				def offset=params.offset
+				def order=params.order
+				def sort=params.sort
+				def itemNum='0'
+				if(params.itemNum){
+					itemNum=params.itemNum
+				}
+				
+				render view: 'list', model: [projectInstanceList: projectInstanceList,
+					projectInstanceTotal: projectInstanceTotal,
+					myProjectInstanceTotal: myProjectInstanceTotal,
+					allProjectInstanceTotal: allProjectInstanceTotal,
+					noticeInstanceMap: noticeInstanceMap,
+					projectItemList:projectItemList,
+					offset:offset,
+					order:order,
+					sort:sort,
+					itemNum:itemNum,
+					searchResult: true,
+					searchProjectInstanceTotal:searchProjectInstanceTotal,
+					remaindingDayMap:remaindingDayMap,
+					q2:params.q2,
+					q3:params.q3,
+					q4:params.q4,
+					q5:params.q5,
+					q6:params.q6,
+					q7:params.q7,
+					q8:params.q8,
+					q9:params.q9,
+					q10:params.q10,
+					q11:params.q11,
+					q12:params.q12,
+					q13:params.q13,
+					q14:params.q14,
+					beginSearchDate:beginSearchDate,
+					endSearchDate:endSearchDate
+					]+ projectResource()+showduetime()
+			//}
+			
+		} catch (Exception ex) {
+			ex.printStackTrace()
+			redirect(action: params.lastAction, params: [itemNum:params.itemNum,order:params.order,max:params.max,sort:params.sort,offset:params.offset])
+		}
+	}
+	
+	def showduetime(){
+		if(!params.daynum){
+			params.daynum = "5"
+		}
+		def daynum = Integer.parseInt(params.daynum)
+		try {
+			def flag=false
 			def currentUser = springSecurityService.currentUser
 			def currentTime=Util.getCurrentDateString()
 			def searchTime1=System.currentTimeMillis()+daynum*24*60*60*1000
@@ -270,9 +658,16 @@ class ProjectController {
 			/*def projectInstanceList1 = Project.executeQuery("SELECT project FROM Project project  WHERE inner_due_date BETWEEN :currentTime AND :searchTime",
 				[currentTime:currentTime,searchTime:searchTime])
 			println projectInstanceList1*/
-			
-			def myProjectInstanceList = Project.executeQuery("SELECT project FROM Project project LEFT JOIN project.supervisors supervisor LEFT JOIN project.analysts analyst LEFT JOIN project.sellers seller LEFT JOIN project.spliters spliter WHERE supervisor = :user OR analyst = :user OR seller = :user OR spliter = :user ",
+			def myProjectInstanceList
+			def authoritiesString=currentUser.getAuthoritiesString()
+			println authoritiesString
+			if(authoritiesString.contains("ROLE_SELLER")){
+				myProjectInstanceList=Project.list()
+				flag=true
+			}else{
+				myProjectInstanceList = Project.executeQuery("SELECT DISTINCT project FROM Project project LEFT JOIN project.supervisors supervisor LEFT JOIN project.analysts analyst LEFT JOIN project.sellers seller LEFT JOIN project.spliters spliter WHERE supervisor = :user OR analyst = :user OR seller = :user OR spliter = :user ",
 				[user: currentUser])
+			}
 			def myProjectDueDateMap=new HashMap<String,Integer>()
 			myProjectDueDateMap.put("UNFINISHED_DUEDATE", 0)
 			myProjectDueDateMap.put("OVER_DUEDATE", 0)
@@ -325,22 +720,21 @@ class ProjectController {
 					projectInstanceList.add(projectInstance)
 				}
 			}*/
-			if(!projectInstanceList){
+			//if(!projectInstanceList){
 				//render projectInstanceTotal
-				return [daynum:daynum,projectCount:projectCount,myProjectDueDateMap:myProjectDueDateMap]
+			//	return [daynum:daynum,projectCount:projectCount,myProjectDueDateMap:myProjectDueDateMap,flag:flag]
 				//redirect(action: "list", params: [itemNum:params.itemNum,order:params.order,max:params.max,sort:params.sort,offset:params.offset,daynum:daynum,projectCount:projectCount])
-			}else{
+			//}else{
 				//render projectCount
-				return [projectInstanceList: projectInstanceList,
-					searchResult: true,
+				return [
 					projectCount:projectCount,
 					daynum:daynum,
-					projectInstanceIdStr:projectInstanceIdStr.toString(),
-					myProjectDueDateMap:myProjectDueDateMap
+					myProjectDueDateMap:myProjectDueDateMap,
+					flag:flag
 					]
-			}
+			//}
 		} catch (Exception ex) {
-		    println 789
+		    ex.printStackTrace()
 			//redirect(action: params.lastAction, params: [itemNum:params.itemNum,order:params.order,max:params.max,sort:params.sort,offset:params.offset,q:params.q,parseException: true])
 		}
 	}
@@ -399,6 +793,9 @@ class ProjectController {
 			String fileUrl=upload()               //调用上传的方法，返回一个储存文件的路径。
 			projectInstance.fileName=fileUrl      //存储文件路径
 			if (!projectInstance.hasErrors() && projectInstance.save(flush: true)) {
+				if(projectInstance.analySendDate){
+					createWorktimeInstance(projectInstance)
+				}
 				def mailList = getUserMailLists(projectInstance,currentUser)
 				if(mailList.contains(currentUser.email)){//去除当前用户
 					mailList.remove(currentUser.email)
@@ -580,18 +977,8 @@ class ProjectController {
 				}
 				
 				if (!projectInstance.hasErrors() && projectInstance.save(flush: true)) {
-					if(projectInstance.isControled && projectInstance.isRemoted){
-						def worktimeInstance=new Worktime()
-						worktimeInstance.project = projectInstance
-						def workcontentInstance =Workcontent.findByCode(projectInstance.routineAnalysis)
-						worktimeInstance.workcontents=workcontentInstance
-						worktimeInstance.completer=springSecurityService.currentUser
-						worktimeInstance.workWay="WAY_USUAL"
-						worktimeInstance.manHour=projectInstance.manHour
-						worktimeInstance.machineHour=projectInstance.machineHour
-						worktimeInstance.comment2=projectInstance.comment1
-						worktimeInstance.finishedDate=projectInstance.analySendDate
-						worktimeInstance.save(flush: true)
+					if(projectInstance.analySendDate){
+						createWorktimeInstance(projectInstance)
 					}
 					//更新项目后，如果新增了相关人员，会发邮件提醒
 					def mailList = getUserMailLists(projectInstance,currentUser)
@@ -676,7 +1063,8 @@ class ProjectController {
 			spliterInstanceList:spliterInstanceList,
 			platformInstanceList: platformInstanceList,
             experimentInstanceList: experimentInstanceList,
-            analysisInstanceList: analysisInstanceList]
+            analysisInstanceList: analysisInstanceList,
+			]
     }
 	def selectProjectItem(){//列选择
 		def projectItemList=params.sub1
@@ -695,9 +1083,33 @@ class ProjectController {
 				itemNum=1
 				itemList=projectItemList
 			}
-			redirect(action: params.lastAction, params: [projectItemList: itemList,itemNum:itemNum,order:params.order,max:params.max,sort:params.sort,offset:params.offset,q:params.q])
+			redirect(action: params.lastAction, params: [projectItemList: itemList,itemNum:itemNum,order:params.order,max:params.max,sort:params.sort,offset:params.offset,q2:params.q2,
+						q3:params.q3,
+						q4:params.q4,
+						q5:params.q5,
+						q6:params.q6,
+						q7:params.q7,
+						q8:params.q8,
+						q9:params.q9,
+						q10:params.q10,
+						q11:params.q11,
+						q12:params.q12,
+						q13:params.q13,
+						q14:params.q14,]+ projectResource()+showduetime())
 		}else{
-			redirect(action: params.lastAction, params: [itemNum:itemNum,order:params.order,max:params.max,sort:params.sort,offset:params.offset,q:params.q])
+			redirect(action: params.lastAction, params: [itemNum:itemNum,order:params.order,max:params.max,sort:params.sort,offset:params.offset,q2:params.q2,
+						q3:params.q3,
+						q4:params.q4,
+						q5:params.q5,
+						q6:params.q6,
+						q7:params.q7,
+						q8:params.q8,
+						q9:params.q9,
+						q10:params.q10,
+						q11:params.q11,
+						q12:params.q12,
+						q13:params.q13,
+						q14:params.q14,]+ projectResource()+showduetime())
 		}
 	}
 	def exportToExcel(){                                //选择性导出列或项目
@@ -727,29 +1139,25 @@ class ProjectController {
 		out.flush();
 		
 		def buf=new StringBuffer();
+		def projectIdList
+		def fla=false
 		
 		if(params.exportAll || "".equals(params.sub)){                              //判断是否是导出全部项目，若是则projectIdList为全部项目id
-			def projectIdList=Project.executeQuery("SELECT id FROM Project project")
+			projectIdList=Project.executeQuery("SELECT id FROM Project project")
+		}else{                                             //若否则projectIdList为页面传递过来的id
+			projectIdList=params.sub
+			fla = projectIdList instanceof String     //判断是否只选择了一行项目，要不然会把string分解
+		}
+		if(fla){
+			def str=projectIdList
+			def bf=getProjectList(str,projectItem)        //得到项目列表
+			buf.append(bf.toString());
+		}else{
 			Iterator iter = projectIdList.iterator()
 			while(iter.hasNext()){
 			 def str = (String) iter.next()
 			 def bf=getProjectList(str,projectItem)
 			 buf.append(bf.toString());
-			}
-		}else{                                             //若否则projectIdList为页面传递过来的id
-			def projectIdList=params.sub
-			boolean fla = projectIdList instanceof String     //判断是否只选择了一行项目，要不然会把string分解
-			if(fla){
-				def str=projectIdList
-				def bf=getProjectList(str,projectItem)        //得到项目列表
-				buf.append(bf.toString());
-			}else{
-				Iterator iter = projectIdList.iterator()
-				while(iter.hasNext()){
-				 def str = (String) iter.next()
-				 def bf=getProjectList(str,projectItem)
-				 buf.append(bf.toString());
-				}
 			}
 		}
 		
@@ -1368,5 +1776,54 @@ class ProjectController {
 			userEamilAndRoleMap.remove(currentUser.email)
 		}
 		return userEamilAndRoleMap
+	}
+	public static void createWorktimeInstance(Project projectInstance){//在保存和新建项目时判断是否需要创建“常规项目”的工时表
+		try{
+			def workcontentInstance =Workcontent.findByCode(projectInstance.routineAnalysis)
+			def flag=false
+			if(projectInstance.worktimes){
+				def worktimeInstanceList=projectInstance.worktimes
+				worktimeInstanceList.each{worktimeInstance->
+					if(worktimeInstance.workcontents.contains(workcontentInstance)){
+						flag=true
+						saveWorktimeByProject(projectInstance,worktimeInstance,workcontentInstance)
+					}
+				}
+			}
+			if(!flag){
+				def worktimeInstance=new Worktime()
+				saveWorktimeByProject(projectInstance,worktimeInstance,workcontentInstance)
+			}
+			
+		}catch(Exception ex){
+			ex.printStackTrace()
+		}
+	}
+	public static void saveWorktimeByProject(Project projectInstance,Worktime worktimeInstance,Workcontent workcontentInstance){
+		worktimeInstance.project = projectInstance
+		
+		worktimeInstance.addToWorkcontents(workcontentInstance)
+		if(projectInstance.analysts){
+			projectInstance.analysts.each { completer ->
+				worktimeInstance.addToCompleters(completer)
+			}
+		}
+		if(projectInstance.platforms){
+			projectInstance.platforms.each { platform ->
+				worktimeInstance.addToPlatforms(platform)
+			}
+		}
+		worktimeInstance.contract=projectInstance.contract
+		worktimeInstance.information=projectInstance.information
+		worktimeInstance.workWay="WAY_USUAL"
+		worktimeInstance.manHour=projectInstance.manHour
+		worktimeInstance.machineHour=projectInstance.machineHour
+		worktimeInstance.comment2=projectInstance.comment1
+		worktimeInstance.finishedDate=projectInstance.analySendDate
+		if(worktimeInstance.hasErrors() || !worktimeInstance.save(flush: true)){
+			worktimeInstance.errors.allErrors.each{
+				println it
+			}
+		}
 	}
 }

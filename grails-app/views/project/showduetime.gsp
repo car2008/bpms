@@ -16,22 +16,27 @@
 		<thead>
 			<tr>
 				<th>
-					<g:message code="showduetime.label" />
+					<g:if test="${flag==true}">
+						<g:message code="showduetime.all.label" />
+					</g:if>
+					<g:else>
+						<g:message code="showduetime.my.label" />
+					</g:else>
 				</th>
 			</tr>
 		</thead>
 		<tbody>
 			<tr>
 				<td>
-					<font style="color:B94A48">未完成项目</font>:
+					<font style="color:green">已完成项目</font>:
 				</td>
 				<td>
-					${myProjectDueDateMap["UNFINISHED_DUEDATE"]}个
+					${myProjectDueDateMap["FINISHED_DUEDATE"]}个
 				</td>
 			</tr>
 			<tr>
 				<td>
-					<font style="color:red">过期的项目</font>:
+					<font style="color:B94A48">过期的项目</font>:
 				</td>
 				<td>
 					${myProjectDueDateMap["OVER_DUEDATE"]}个
@@ -39,10 +44,10 @@
 			</tr>
 			<tr>
 				<td>
-					<font style="color:green">已完成项目</font>:
+					<font style="color:red">未完成项目</font>:
 				</td>
 				<td>
-					${myProjectDueDateMap["FINISHED_DUEDATE"]}个
+					${myProjectDueDateMap["UNFINISHED_DUEDATE"]}个
 				</td>
 			</tr>
 			<tr>
