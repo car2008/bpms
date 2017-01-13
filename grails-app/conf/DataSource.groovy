@@ -13,8 +13,8 @@ hibernate {
 environments {
     development {
         dataSource {
-            dbCreate = "create-drop" // one of 'create', 'create-drop','update'
-            url = "jdbc:mysql://localhost:3306/${appName}_dev?characterEncoding=utf8"
+            dbCreate = "update" // one of 'create', 'create-drop','update'
+            url = "jdbc:mysql://localhost:3306/bpms_czp?characterEncoding=utf8"
             username = "root"
             password = "root"
             logSql = false
@@ -23,7 +23,7 @@ environments {
     test {
         dataSource {
             dbCreate = "create-drop"
-            url = "jdbc:mysql://localhost:3306/${appName}_test?characterEncoding=utf8"
+            url = "jdbc:mysql://localhost:3306/bpms_czp?characterEncoding=utf8"
             username = "root"
             password = "root"
         }
@@ -31,9 +31,9 @@ environments {
     production {
         dataSource {
             dbCreate = "update"
-            url = "jdbc:mysql://localhost:3306/${appName}?characterEncoding=utf8"
+            url = "jdbc:mysql://localhost:3306/bpms_czp?characterEncoding=utf8"
             username = "root"
-            password = "root"
+            password = ""
             pooled = true
             properties {
                 maxActive = 100

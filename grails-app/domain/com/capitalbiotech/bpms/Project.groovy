@@ -52,6 +52,7 @@ class Project {
 	Long readLength					//测序读长
 	Long readsNum					//每个样本的reads
 	Long dataSize					//每个样本的数据量
+	Set<User> examiners             //数据分析审核员
 	Set<User> spliters				//CASAVA拆分员
 	String fileName                 //上传文件名
 	String filePath                 //上传文件的相对路径
@@ -113,6 +114,7 @@ class Project {
         analysts: User,
         sellers: User,
 		spliters:User,
+		examiners:User,
     ]
 
     List<Message> getMessages() {
@@ -195,7 +197,7 @@ class Project {
 		filePath blank: true,nullable: true
 		platforms blank: true,nullable: true*/
 		title blank: false, unique: true
-		contract blank: true,nullable: true
+		contract blank: false,nullable: false
 		customerUnit blank: true,nullable: true
 		customerName blank: true,nullable: true
 		information blank: true,nullable: true
@@ -229,7 +231,7 @@ class Project {
 		metaSendWay blank: true,nullable: true
 		analySendWay blank: true,nullable: true
 		libraryBuildWay blank: true,nullable: true
-		
+		analysts blank: false,nullable: false
     }
     
     static mapping = {

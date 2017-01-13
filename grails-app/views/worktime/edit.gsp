@@ -46,18 +46,15 @@
 					<div class="controls">
 						<g:actionSubmit class="btn btn-primary" action="update"
 							value="${message(code: 'default.button.update.label', default: 'Update')}" />
-						<sec:ifAnyGranted roles="ROLE_ADMIN">
-							<g:actionSubmit class="btn btn-danger" action="delete"
-								href="#deleteModal" data-toggle="modal"
-								value="${message(code: 'default.button.delete.label', default: 'Delete')}" />
-						</sec:ifAnyGranted>
+						<g:actionSubmit class="btn btn-danger" action="delete"
+							href="#deleteModal" data-toggle="modal"
+							value="${message(code: 'default.button.delete.label', default: 'Delete')}" />
 					</div>
 				</div>
 			</g:form>
 			</div>
 		</div>
 	</div>
-	<sec:ifAnyGranted roles="ROLE_ADMIN">
 		<!-- Modal -->
 		<div id="deleteModal" class="modal hide fade" tabindex="-1"
 			role="dialog" aria-labelledby="deleteModalLabel" aria-hidden="true">
@@ -78,6 +75,5 @@
 				</g:form>
 			</div>
 		</div>
-	</sec:ifAnyGranted>
 </body>
 </html>

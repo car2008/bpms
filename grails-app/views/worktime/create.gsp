@@ -26,7 +26,6 @@
 			<div class="span9">
 			<g:form action="save" class="form-horizontal">
 				<g:hiddenField name="title" value="${projectInstance.title}"/>
-				<g:hiddenField name="contract" value="${projectInstance.contract}"/>
 				<g:hiddenField name="information" value="${projectInstance.information}"/>
 				<g:render template="form" model="${[projectInstance: projectInstance]}"/>
 				<div class="control-group">

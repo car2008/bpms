@@ -9,6 +9,8 @@ import java.util.Set;
 import org.codehaus.groovy.grails.web.json.JSONArray
 import org.codehaus.groovy.grails.web.json.JSONObject
 
+import bpms.HolidayUtil;
+
 import com.capitalbiotech.bpms.SendEmailAsynchronously
 
 @Secured(['ROLE_USER'])
@@ -17,6 +19,8 @@ class ProjectController {
     static allowedMethods = [save: "POST", update: "POST", delete: "POST"]
 
     def springSecurityService
+	def grailsApplication
+	HolidayUtil h = new HolidayUtil();
 
 	def index = {
 		redirect(action: "list", params: params)
@@ -43,7 +47,7 @@ class ProjectController {
 
         def projectInstanceTotal = Project.count()
         def allProjectInstanceTotal = projectInstanceTotal
-        def myProjectInstanceTotal = Project.executeQuery("SELECT COUNT(DISTINCT project), project FROM Project project LEFT JOIN project.supervisors supervisor LEFT JOIN project.analysts analyst LEFT JOIN project.sellers seller LEFT JOIN project.spliters spliter WHERE supervisor = :user OR analyst = :user OR seller = :user OR spliter = :user",
+        def myProjectInstanceTotal = Project.executeQuery("SELECT COUNT(DISTINCT project), project FROM Project project LEFT JOIN project.supervisors supervisor LEFT JOIN project.analysts analyst LEFT JOIN project.sellers seller LEFT JOIN project.spliters spliter LEFT JOIN project.examiners examiner WHERE supervisor = :user OR analyst = :user OR seller = :user OR spliter = :user OR examiner = :user",
             [user: currentUser])[0][0]
 		
 		def remaindingDayMap = [:]
@@ -84,6 +88,7 @@ class ProjectController {
 			q12:params.q12,
 			q13:params.q13,
 			q14:params.q14,
+			q15:params.q15,
 			]+ projectResource()+showduetime()
     }
 
@@ -104,7 +109,7 @@ class ProjectController {
 		}
 
         def currentUser = springSecurityService.currentUser
-        def projectInstanceList = Project.executeQuery("SELECT DISTINCT(project) FROM Project project LEFT JOIN project.supervisors supervisor LEFT JOIN project.analysts analyst LEFT JOIN project.sellers seller LEFT JOIN project.spliters spliter WHERE supervisor = :user OR analyst = :user OR seller = :user OR spliter = :user ORDER BY project.${params.sort} ${params.order}",
+        def projectInstanceList = Project.executeQuery("SELECT DISTINCT(project) FROM Project project LEFT JOIN project.supervisors supervisor LEFT JOIN project.analysts analyst LEFT JOIN project.sellers seller LEFT JOIN project.spliters spliter LEFT JOIN project.examiners examiner WHERE supervisor = :user OR analyst = :user OR seller = :user OR spliter = :user OR examiner = :user ORDER BY project.${params.sort} ${params.order}",
             [user: currentUser], [offset: params.offset, max:params.max])
 
         def noticeInstanceMap = [:]
@@ -113,7 +118,7 @@ class ProjectController {
             noticeInstanceMap[noticeInstance.project.id] = noticeInstance.unread
         }
 		
-        def projectInstanceTotal = Project.executeQuery("SELECT COUNT(DISTINCT project), project FROM Project project LEFT JOIN project.supervisors supervisor LEFT JOIN project.analysts analyst LEFT JOIN project.sellers seller LEFT JOIN project.spliters spliter WHERE supervisor = :user OR analyst = :user OR seller = :user OR spliter = :user",
+        def projectInstanceTotal = Project.executeQuery("SELECT COUNT(DISTINCT project), project FROM Project project LEFT JOIN project.supervisors supervisor LEFT JOIN project.analysts analyst LEFT JOIN project.sellers seller LEFT JOIN project.spliters spliter LEFT JOIN project.examiners examiner WHERE supervisor = :user OR analyst = :user OR seller = :user OR spliter = :user OR examiner = :user",
             [user: currentUser])[0][0]
         def myProjectInstanceTotal = projectInstanceTotal
         def allProjectInstanceTotal = Project.count()
@@ -124,12 +129,15 @@ class ProjectController {
 				remaindingDayMap[projectInstance.id] = ""
 			}else{
 				def innerDueDate=projectInstance.innerDueDate
-				println innerDueDate
+				//println innerDueDate
 				def currentDate=Util.parseSimpleDate(Util.getCurrentDateString())
-				def remaindingDay=(innerDueDate.getTime()-currentDate.getTime())/86400000
-				if(remaindingDay<0){
-					
-				}else{
+				//def remaindingDay=(innerDueDate.getTime()-currentDate.getTime())/86400000
+				String innerDueDateStr=Util.dateParser1.format(innerDueDate)
+				//println innerDueDateStr
+				def workdayFilePath = "${grailsApplication.config.workday.holiday.file}"
+				
+				if(innerDueDate.getTime()>=currentDate.getTime()){
+					def remaindingDay=h.getWorkDayNum(workdayFilePath,innerDueDateStr);
 					remaindingDayMap[projectInstance.id] = remaindingDay
 				}
 			}
@@ -172,6 +180,7 @@ class ProjectController {
 			q12:params.q12,
 			q13:params.q13,
 			q14:params.q14,
+			q15:params.q15,
 			]+ projectResource()+showduetime()
     }
 	
@@ -193,14 +202,16 @@ class ProjectController {
 		if(!params.daynum){
 			params.daynum = "5"
 		}
-		def daynum = Integer.parseInt(params.daynum)
 		try {
+			def daynum = Integer.parseInt(params.daynum)
+			def workdayFilePath = "${grailsApplication.config.workday.holiday.file}"
 			def projectInstanceTotal
 			def flag=false
 			def currentUser = springSecurityService.currentUser
 			def currentTime=Util.getCurrentDateString()
-			def searchTime1=System.currentTimeMillis()+daynum*24*60*60*1000
-			def searchTime=Util.dateParser1.format(new Date(searchTime1))
+			//def searchTime1=System.currentTimeMillis()+daynum*24*60*60*1000
+			//def searchTime=Util.dateParser1.format(new Date(searchTime1))
+			def searchTime=h.getWorkDay(workdayFilePath,daynum)
 			def projectCount=0
 			def projectInstanceList=new ArrayList<Project>()
 			def projectInstanceIdStr=new StringBuffer()
@@ -210,6 +221,7 @@ class ProjectController {
 			def endTime=Util.dateParser2.format(new Date(seatime.getTime()))
 			
 			//println currentTime+"--"+searchTime
+			//println beginTime+"--"+endTime
 			//println curtime
 			//println beginTime
 			/*def projectInstanceList1 = Project.executeQuery("SELECT project FROM Project project  WHERE inner_due_date BETWEEN :currentTime AND :searchTime",
@@ -217,24 +229,27 @@ class ProjectController {
 			println projectInstanceList1*/
 			def myProjectInstanceList
 			def authoritiesString=currentUser.getAuthoritiesString()
-			println authoritiesString
+			//println authoritiesString
 			if(authoritiesString.contains("ROLE_SELLER")){
+				//println 123
 				myProjectInstanceList=Project.list()
-				projectInstanceList = Project.executeQuery("SELECT DISTINCT(project) FROM Project project WHERE project.innerDueDate BETWEEN '"+beginTime+"' AND '"+endTime+"' ORDER BY project.${params.sort} ${params.order}",
+				projectInstanceList = Project.executeQuery("SELECT DISTINCT(project) FROM Project project WHERE where inner_due_date is not null AND project.innerDueDate BETWEEN '"+beginTime+"' AND '"+endTime+"' ORDER BY project.${params.sort} ${params.order}",
 					[offset: params.offset, max:params.max])
 				flag=true
 			}else{
-				myProjectInstanceList = Project.executeQuery("SELECT DISTINCT project FROM Project project LEFT JOIN project.supervisors supervisor LEFT JOIN project.analysts analyst LEFT JOIN project.sellers seller LEFT JOIN project.spliters spliter WHERE supervisor = :user OR analyst = :user OR seller = :user OR spliter = :user ",
+				//println 456
+				myProjectInstanceList = Project.executeQuery("SELECT DISTINCT(project) FROM Project project LEFT JOIN project.supervisors supervisor LEFT JOIN project.analysts analyst LEFT JOIN project.sellers seller LEFT JOIN project.spliters spliter LEFT JOIN project.examiners examiner WHERE supervisor = :user OR analyst = :user OR seller = :user OR spliter = :user OR examiner = :user ",
 				[user: currentUser])
-				projectInstanceList = Project.executeQuery("SELECT DISTINCT(project) FROM Project project LEFT JOIN project.supervisors supervisor LEFT JOIN project.analysts analyst LEFT JOIN project.sellers seller LEFT JOIN project.spliters spliter WHERE project.innerDueDate BETWEEN '"+beginTime+"' AND '"+endTime+"' "+"AND supervisor = :user OR analyst = :user OR seller = :user OR spliter = :user ORDER BY project.${params.sort} ${params.order}",
-					[user: currentUser], [offset: params.offset, max:params.max])
+				/*projectInstanceList = Project.executeQuery("SELECT DISTINCT(project) FROM Project project LEFT JOIN project.supervisors supervisor LEFT JOIN project.analysts analyst LEFT JOIN project.sellers seller LEFT JOIN project.spliters spliter LEFT JOIN project.examiners examiner WHERE isnull(inner_due_date) is false AND project.innerDueDate BETWEEN '"+beginTime+"' AND '"+endTime+"' "+"AND supervisor = :user OR analyst = :user OR seller = :user OR spliter = :user OR examiner = :user ORDER BY project.${params.sort} ${params.order}",
+					[user: currentUser], [offset: params.offset, max:params.max])*/
+				projectInstanceList = Project.executeQuery("SELECT DISTINCT(project) FROM Project project LEFT JOIN project.supervisors supervisor LEFT JOIN project.analysts analyst LEFT JOIN project.sellers seller LEFT JOIN project.spliters spliter LEFT JOIN project.examiners examiner WHERE isnull(inner_due_date) is false AND project.innerDueDate BETWEEN '"+beginTime+"' AND '"+endTime+"' "+"AND (supervisor = :user OR analyst = :user OR seller = :user OR spliter = :user OR examiner = :user) ORDER BY project.${params.sort} ${params.order}", [user: currentUser], [offset: params.offset, max:params.max])
 			}
 			def myProjectDueDateMap=new HashMap<String,Integer>()
 			myProjectDueDateMap.put("UNFINISHED_DUEDATE", 0)
 			myProjectDueDateMap.put("OVER_DUEDATE", 0)
 			myProjectDueDateMap.put("FINISHED_DUEDATE", 0)
 			//def a=myProjectDueDateMap.get("UNFINISHED_DUEDATE")
-			//println a
+			//println projectInstanceList
 			//def b=myProjectDueDateMap.get("OVER_DUEDATE")
 			//def c=myProjectDueDateMap.get("FINISHED_DUEDATE")
 			myProjectInstanceList?.each { projectInstance ->
@@ -289,7 +304,7 @@ class ProjectController {
 					if(!projectInstance.innerDueDate || "".equals(projectInstance.innerDueDate) ){
 						remaindingDayMap[projectInstance.id] = ""
 					}else{
-						def innerDueDate=projectInstance.innerDueDate
+						/*def innerDueDate=projectInstance.innerDueDate
 						//println innerDueDate
 						def currentDate=Util.parseSimpleDate(Util.getCurrentDateString())
 						def remaindingDay=(innerDueDate.getTime()-currentDate.getTime())/86400000
@@ -297,12 +312,22 @@ class ProjectController {
 							
 						}else{
 							remaindingDayMap[projectInstance.id] = remaindingDay
+						}*/
+						def innerDueDate=projectInstance.innerDueDate
+						//println innerDueDate
+						def currentDate=Util.parseSimpleDate(Util.getCurrentDateString())
+						//def remaindingDay=(innerDueDate.getTime()-currentDate.getTime())/86400000
+						String innerDueDateStr=Util.dateParser1.format(innerDueDate)
+						
+						if(innerDueDate.getTime()>=currentDate.getTime()){
+							def remaindingDay=h.getWorkDayNum(workdayFilePath,innerDueDateStr);
+							remaindingDayMap[projectInstance.id] = remaindingDay
 						}
 					}
 				}
 				
 				def searchProjectInstanceTotal=projectInstanceTotal
-				def myProjectInstanceTotal = Project.executeQuery("SELECT COUNT(DISTINCT project), project FROM Project project LEFT JOIN project.supervisors supervisor LEFT JOIN project.analysts analyst LEFT JOIN project.sellers seller LEFT JOIN project.spliters spliter WHERE supervisor = :user OR analyst = :user OR seller = :user OR spliter = :user",
+				def myProjectInstanceTotal = Project.executeQuery("SELECT COUNT(DISTINCT project), project FROM Project project LEFT JOIN project.supervisors supervisor LEFT JOIN project.analysts analyst LEFT JOIN project.sellers seller LEFT JOIN project.spliters spliter LEFT JOIN project.examiners examiner WHERE supervisor = :user OR analyst = :user OR seller = :user OR spliter = :user OR examiner = :user",
 				[user: currentUser])[0][0]
 				def allProjectInstanceTotal = Project.count()
 				def projectItemList=params.projectItemList
@@ -340,6 +365,7 @@ class ProjectController {
 					q12:params.q12,
 					q13:params.q13,
 					q14:params.q14,
+					q15:params.q15,
 					projectCount:projectCount,
 					daynum:daynum,
 					projectInstanceIdStr:projectInstanceIdStr.toString(),
@@ -385,6 +411,7 @@ class ProjectController {
 		def q12 = params.q12?.trim()
 		def q13 = params.q13?.trim()
 		def q14 = params.q14?.trim()
+		def q15 = params.q15?.trim()
 		def stringBuf=new StringBuffer()
 		
 		try {
@@ -418,7 +445,10 @@ class ProjectController {
 			if(q14){
 				stringBuf.append("LEFT JOIN project.sellers seller ")
 			}
-			if(beginSearchDate && endSearchDate ||(q2||q3||q4||q5||q6||q7||q8||q9||q10||q11||q12||q13||q14)){
+			if(q15){
+				stringBuf.append("LEFT JOIN project.examiners examiner ")
+			}
+			if(beginSearchDate && endSearchDate ||(q2||q3||q4||q5||q6||q7||q8||q9||q10||q11||q12||q13||q14||q15)){
 				stringBuf.append("WHERE ")
 			}
 			if(beginSearchDate && endSearchDate){
@@ -460,6 +490,11 @@ class ProjectController {
 				def seller=User.findByUsername(q14)
 				stringBuf.append("AND seller = :seller ")
 				paramMap1.put("seller", seller)
+			}
+			if(q15){
+				def examiner=User.findByUsername(q15)
+				stringBuf.append("AND examiner = :examiner ")
+				paramMap1.put("examiner", examiner)
 			}
 			
 			def s1=stringBuf.toString()
@@ -538,8 +573,8 @@ class ProjectController {
 			}else{
 				projectInstanceList.addAll(projectInstanceList1)
 			}*/
-			println projectInstanceList
-			println projectInstanceTotal
+			//println projectInstanceList
+			//println projectInstanceTotal
 			//if(!params.projectInstanceTotal){
 				//projectInstanceList = Project.executeQuery("SELECT project FROM Project project WHERE contract like '%"+q+"%' OR customerUnit like '%"+q+"%' OR customerName like '%"+q+"%' OR species like '%"+q+"%' OR k3number like '%"+q+"%' OR information like '%"+q+"%' OR level like '%"+q+"%' OR salesman like '%"+q+"%'"+"ORDER BY project.${params.sort} ${params.order}",
 				//	[offset: params.offset, max:params.max])
@@ -578,20 +613,30 @@ class ProjectController {
 					if(!projectInstance.innerDueDate || "".equals(projectInstance.innerDueDate) ){
 						remaindingDayMap[projectInstance.id] = ""
 					}else{
-						def innerDueDate=projectInstance.innerDueDate
-						println innerDueDate
+						/*def innerDueDate=projectInstance.innerDueDate
+						//println innerDueDate
 						def currentDate=Util.parseSimpleDate(Util.getCurrentDateString())
 						def remaindingDay=(innerDueDate.getTime()-currentDate.getTime())/86400000
 						if(remaindingDay<0){
 							
 						}else{
 							remaindingDayMap[projectInstance.id] = remaindingDay
+						}*/
+						def innerDueDate=projectInstance.innerDueDate
+						//println innerDueDate
+						def currentDate=Util.parseSimpleDate(Util.getCurrentDateString())
+						//def remaindingDay=(innerDueDate.getTime()-currentDate.getTime())/86400000
+						String innerDueDateStr=Util.dateParser1.format(innerDueDate)
+						def workdayFilePath = "${grailsApplication.config.workday.holiday.file}"
+						if(innerDueDate.getTime()>=currentDate.getTime()){
+							def remaindingDay=h.getWorkDayNum(workdayFilePath,innerDueDateStr);
+							remaindingDayMap[projectInstance.id] = remaindingDay
 						}
 					}
 				}
 				
 				def searchProjectInstanceTotal=projectInstanceTotal
-				def myProjectInstanceTotal = Project.executeQuery("SELECT COUNT(DISTINCT project), project FROM Project project LEFT JOIN project.supervisors supervisor LEFT JOIN project.analysts analyst LEFT JOIN project.sellers seller LEFT JOIN project.spliters spliter WHERE supervisor = :user OR analyst = :user OR seller = :user OR spliter = :user",
+				def myProjectInstanceTotal = Project.executeQuery("SELECT COUNT(DISTINCT project), project FROM Project project LEFT JOIN project.supervisors supervisor LEFT JOIN project.analysts analyst LEFT JOIN project.sellers seller LEFT JOIN project.spliters spliter LEFT JOIN project.examiners examiner WHERE supervisor = :user OR analyst = :user OR seller = :user OR spliter = :user OR examiner = :user",
 				[user: currentUser])[0][0]
 				def allProjectInstanceTotal = Project.count()
 				def projectItemList=params.projectItemList
@@ -629,6 +674,7 @@ class ProjectController {
 					q12:params.q12,
 					q13:params.q13,
 					q14:params.q14,
+					q15:params.q15,
 					beginSearchDate:beginSearchDate,
 					endSearchDate:endSearchDate
 					]+ projectResource()+showduetime()
@@ -645,27 +691,30 @@ class ProjectController {
 			params.daynum = "5"
 		}
 		def daynum = Integer.parseInt(params.daynum)
+		def workdayFilePath = "${grailsApplication.config.workday.holiday.file}"
 		try {
 			def flag=false
 			def currentUser = springSecurityService.currentUser
 			def currentTime=Util.getCurrentDateString()
-			def searchTime1=System.currentTimeMillis()+daynum*24*60*60*1000
-			def searchTime=Util.dateParser1.format(new Date(searchTime1))
+			def searchTime=h.getWorkDay(workdayFilePath,daynum)
+			//def searchTime1=System.currentTimeMillis()+daynum*24*60*60*1000
+			//def searchTime1=Util.dateParser1.parse(searchTime1Str)
+			//def searchTime=Util.dateParser1.format(new Date(searchTime1.getTime()))
 			def projectCount=0
 			def projectInstanceList=new ArrayList<Project>()
 			def projectInstanceIdStr=new StringBuffer()
-			println currentTime+"--"+searchTime
+			//println currentTime+"--"+searchTime
 			/*def projectInstanceList1 = Project.executeQuery("SELECT project FROM Project project  WHERE inner_due_date BETWEEN :currentTime AND :searchTime",
 				[currentTime:currentTime,searchTime:searchTime])
 			println projectInstanceList1*/
 			def myProjectInstanceList
 			def authoritiesString=currentUser.getAuthoritiesString()
-			println authoritiesString
+			//println authoritiesString
 			if(authoritiesString.contains("ROLE_SELLER")){
 				myProjectInstanceList=Project.list()
 				flag=true
 			}else{
-				myProjectInstanceList = Project.executeQuery("SELECT DISTINCT project FROM Project project LEFT JOIN project.supervisors supervisor LEFT JOIN project.analysts analyst LEFT JOIN project.sellers seller LEFT JOIN project.spliters spliter WHERE supervisor = :user OR analyst = :user OR seller = :user OR spliter = :user ",
+				myProjectInstanceList = Project.executeQuery("SELECT DISTINCT project FROM Project project LEFT JOIN project.supervisors supervisor LEFT JOIN project.analysts analyst LEFT JOIN project.sellers seller LEFT JOIN project.spliters spliter LEFT JOIN project.examiners examiner WHERE supervisor = :user OR analyst = :user OR seller = :user OR spliter = :user OR examiner = :user",
 				[user: currentUser])
 			}
 			def myProjectDueDateMap=new HashMap<String,Integer>()
@@ -775,6 +824,7 @@ class ProjectController {
 			params.backupDate = Util.parseSimpleDate(params.backupDate)
 		}
 		//在保存数据时才写入title(项目编号)，与id一致，同时把title拼接到information前
+		def information=params.information
 		def maxId = Project.executeQuery("SELECT max(id) FROM Project project")
 		def maxIdString=maxId.toString().replace("[","")
 		maxIdString=maxIdString.replace("]","")
@@ -792,10 +842,20 @@ class ProjectController {
 		}else{
 			String fileUrl=upload()               //调用上传的方法，返回一个储存文件的路径。
 			projectInstance.fileName=fileUrl      //存储文件路径
+			
 			if (!projectInstance.hasErrors() && projectInstance.save(flush: true)) {
-				if(projectInstance.analySendDate){
-					createWorktimeInstance(projectInstance)
+				def projectId = Project.executeQuery("SELECT project.id FROM Project project where project.title='"+projectInstance.title+"'")
+				def idStr=projectId.toString().replace("[","")
+				idStr=idStr.replace("]","")
+				if(!projectInstance.title.equals(idStr)){
+					def informationStr=idStr+"_"+information
+					Project.executeUpdate("UPDATE Project project set project.title='"+idStr+"' WHERE project.id='"+idStr+"'")
+					Project.executeUpdate("UPDATE Project project set project.information='"+informationStr+"' WHERE project.id='"+idStr+"'")
 				}
+				
+				//if(projectInstance.analySendDate){
+				//	createWorktimeInstance(projectInstance)
+				//}
 				def mailList = getUserMailLists(projectInstance,currentUser)
 				if(mailList.contains(currentUser.email)){//去除当前用户
 					mailList.remove(currentUser.email)
@@ -805,11 +865,11 @@ class ProjectController {
 				mailList?.each { mail ->
 					def toUser=User.findByEmail(mail)
 					nameList.add(toUser.name)
-					def sendMail=new SendEmailAsynchronously(mail,Util.getCurrentTimeString()+"提醒-->新建项目："+projectInstance.title,"你好，<b>"+toUser.name+"</b>，<br/>&nbsp;&nbsp;&nbsp;&nbsp;刚刚<b>"+currentUser.name+"</b>新建了一个项目，项目信息为：<b>"+projectInstance.information+"</b> ；你是该项目的<b>"+userEmailAndRole.get(mail).toString()+"</b>，请及时处理： <a href=http://192.168.2.72:8080/bpms/project/show/"+projectInstance.title+">去处理</a>")
+					def sendMail=new SendEmailAsynchronously(mail,Util.getCurrentTimeString()+"提醒-->新建项目："+projectInstance.title,"你好，<b>"+toUser.name+"</b>，<br/>&nbsp;&nbsp;&nbsp;&nbsp;刚刚<b>"+currentUser.name+"</b>新建了一个项目，项目信息为：<b>"+projectInstance.information+"</b> ；你是该项目的<b>"+userEmailAndRole.get(mail).toString()+"</b>，请及时处理： <a href=http://cloud.capitalbiotech.com/bpms/project/show/"+projectInstance.title+">去处理</a>")
 					sendMail.sendMail()
 				}
 				if(nameList){
-					def sendMail=new SendEmailAsynchronously(currentUser.email,Util.getCurrentTimeString()+"提醒-->新建项目："+projectInstance.title,"你好，<b>"+currentUser.name+"</b>，<br/>&nbsp;&nbsp;&nbsp;&nbsp;刚刚你新建了一个项目，项目信息为：<b>"+projectInstance.information+"</b> ；并发送邮件提醒了<b>"+nameList.toString()+"</b>：<a href=http://192.168.2.72:8080/bpms/project/show/"+projectInstance.title+">去查看</a>")
+					def sendMail=new SendEmailAsynchronously(currentUser.email,Util.getCurrentTimeString()+"提醒-->新建项目："+projectInstance.title,"你好，<b>"+currentUser.name+"</b>，<br/>&nbsp;&nbsp;&nbsp;&nbsp;刚刚你新建了一个项目，项目信息为：<b>"+projectInstance.information+"</b> ；并发送邮件提醒了<b>"+nameList.toString()+"</b>：<a href=http://cloud.capitalbiotech.com/bpms/project/show/"+projectInstance.title+">去查看</a>")
 					sendMail.sendMail()
 				}
 				def track = new Track(project: projectInstance, operator: currentUser, status: projectInstance.status)
@@ -897,6 +957,18 @@ class ProjectController {
 		}
 	}
 	
+	def transNumToDate = {
+		def n=Integer.parseInt(params.id)
+		def workdayFilePath = "${grailsApplication.config.workday.holiday.file}"
+		String workday = h.getWorkDay(workdayFilePath,n);
+		if (!workday) {
+			render "null"
+		}
+		else{
+			render workday
+		}
+	}
+	
 	def findMaxId = {
 		def maxId = Project.executeQuery("SELECT max(id) FROM Project project")
 		if (!maxId) {
@@ -952,6 +1024,7 @@ class ProjectController {
 			projectInstance.platforms.clear()
             projectInstance.supervisors.clear()
             projectInstance.analysts.clear()
+			projectInstance.examiners.clear()
             projectInstance.sellers.clear()
 			projectInstance.spliters.clear()
 
@@ -965,7 +1038,7 @@ class ProjectController {
 				
 			}else{
 				if(!f.empty){        //只要选中了文件，就会上传，防止同名的文件做修改后再被选中不上传
-						def webRootDir = servletContext.getRealPath("/")
+						def webRootDir = "${grailsApplication.config.project.file.upload.path}"
 						def rootFilePath = new File(webRootDir, "WEB-INF/upload")
 						if(!rootFilePath.exists()){
 							rootFilePath.mkdirs();
@@ -977,9 +1050,9 @@ class ProjectController {
 				}
 				
 				if (!projectInstance.hasErrors() && projectInstance.save(flush: true)) {
-					if(projectInstance.analySendDate){
-						createWorktimeInstance(projectInstance)
-					}
+					//if(projectInstance.analySendDate){
+					//	createWorktimeInstance(projectInstance)
+					//}
 					//更新项目后，如果新增了相关人员，会发邮件提醒
 					def mailList = getUserMailLists(projectInstance,currentUser)
 					if(mailList.contains(currentUser.email)){//去除当前用户
@@ -993,12 +1066,12 @@ class ProjectController {
 						def role=userEmailAndRole.get(mail)
 						if( "".equals(mailListbefor) || mailListbefor==null || !mailListbefor.contains(mail) || !roleBefor.toString().equals(role.toString())){
 							nameList.add(toUser.name)
-							def sendMail=new SendEmailAsynchronously(mail,Util.getCurrentTimeString()+"提醒-->更新项目："+projectInstance.title,"你好，<b>"+toUser.name+"</b>，<br/>&nbsp;&nbsp;&nbsp;&nbsp;刚刚<b>"+currentUser.name+"</b>更新了项目：<b>"+projectInstance.information+"</b> ；你是该项目的<b>"+userEmailAndRole.get(mail).toString()+"</b>，请及时处理： <a href=http://192.168.2.72:8080/bpms/project/show/"+projectInstance.title+">去处理</a>")
+							def sendMail=new SendEmailAsynchronously(mail,Util.getCurrentTimeString()+"提醒-->更新项目："+projectInstance.title,"你好，<b>"+toUser.name+"</b>，<br/>&nbsp;&nbsp;&nbsp;&nbsp;刚刚<b>"+currentUser.name+"</b>更新了项目：<b>"+projectInstance.information+"</b> ；你是该项目的<b>"+userEmailAndRole.get(mail).toString()+"</b>，请及时处理： <a href=http://cloud.capitalbiotech.com/bpms/project/show/"+projectInstance.title+">去处理</a>")
 							sendMail.sendMail()
 						}
 					}
 					if(nameList){
-						def sendMail=new SendEmailAsynchronously(currentUser.email,Util.getCurrentTimeString()+"提醒-->更新项目："+projectInstance.title,"你好，<b>"+currentUser.name+"</b>，<br/>&nbsp;&nbsp;&nbsp;&nbsp;刚刚你更新了项目：<b>"+projectInstance.information+"</b> ；并发送邮件提醒了<b>"+nameList.toString()+"</b>：<a href=http://192.168.2.72:8080/bpms/project/show/"+projectInstance.title+">去查看</a>")
+						def sendMail=new SendEmailAsynchronously(currentUser.email,Util.getCurrentTimeString()+"提醒-->更新项目："+projectInstance.title,"你好，<b>"+currentUser.name+"</b>，<br/>&nbsp;&nbsp;&nbsp;&nbsp;刚刚你更新了项目：<b>"+projectInstance.information+"</b> ；并发送邮件提醒了<b>"+nameList.toString()+"</b>：<a href=http://cloud.capitalbiotech.com/bpms/project/show/"+projectInstance.title+">去查看</a>")
 						sendMail.sendMail()
 					}
 					
@@ -1025,6 +1098,13 @@ class ProjectController {
         def projectInstance = Project.get(params.id)
         if (projectInstance) {
             try {
+				if(projectInstance.messages){
+					Message.executeUpdate("DELETE Message message where message.project=:projectInstance",[projectInstance:projectInstance])
+				}
+				if(projectInstance.tracks){
+					Track.executeUpdate("DELETE Track track where track.project= :projectInstance",[projectInstance:projectInstance])
+				}
+				
                 projectInstance.delete(flush: true)
                 flash.message = "${message(code: 'default.deleted.message', args: [message(code: 'project.label', default: 'Project'), ''])}"
                 redirect(action: "list")
@@ -1046,6 +1126,9 @@ class ProjectController {
 
         def analystRole = Role.findByAuthority("ROLE_ANALYST")
         def analystInstanceList = UserRole.findAllByRole(analystRole).user
+		
+		def examinerRole = Role.findByAuthority("ROLE_EXAMINER")
+		def examinerInstanceList = UserRole.findAllByRole(examinerRole).user
 
         def sellerRole = Role.findByAuthority("ROLE_SELLER")
         def sellerInstanceList = UserRole.findAllByRole(sellerRole).user
@@ -1064,6 +1147,7 @@ class ProjectController {
 			platformInstanceList: platformInstanceList,
             experimentInstanceList: experimentInstanceList,
             analysisInstanceList: analysisInstanceList,
+			examinerInstanceList:examinerInstanceList,
 			]
     }
 	def selectProjectItem(){//列选择
@@ -1095,7 +1179,9 @@ class ProjectController {
 						q11:params.q11,
 						q12:params.q12,
 						q13:params.q13,
-						q14:params.q14,]+ projectResource()+showduetime())
+						q14:params.q14,
+						q15:params.q15,
+						]+ projectResource()+showduetime())
 		}else{
 			redirect(action: params.lastAction, params: [itemNum:itemNum,order:params.order,max:params.max,sort:params.sort,offset:params.offset,q2:params.q2,
 						q3:params.q3,
@@ -1109,7 +1195,9 @@ class ProjectController {
 						q11:params.q11,
 						q12:params.q12,
 						q13:params.q13,
-						q14:params.q14,]+ projectResource()+showduetime())
+						q14:params.q14,
+						q15:params.q15,
+						]+ projectResource()+showduetime())
 		}
 	}
 	def exportToExcel(){                                //选择性导出列或项目
@@ -1129,7 +1217,7 @@ class ProjectController {
 		def projectItem=params.projectItemList            //String类型的projectItem
 		def head=getProjectHead(projectItem)              //得到表头
 		if(projectItem==null || projectItem=="" || "".equals(projectItem)){		  //如果为空则对projectItem赋值，下面会用到
-			projectItem="title contract level projectCreateDate lastUpdated dueTime supervisors analysts sellers status messages experiments"+
+			projectItem="title contract level projectCreateDate lastUpdated dueTime supervisors analysts examiners sellers status messages experiments"+
 			"analyses salesman customerUnit customerName platforms information species samplesize k3number batch metaSendData analyStartDate"+
 			"analySendDate innerDueDate backupDate metaSendWay analySendWay manHour machineHour comment1 overdueReason backupLocation isRemoted isControled"+
 			"worktimes libraryBuildWay readLength readsNum dataSize spliters"
@@ -1185,6 +1273,7 @@ class ProjectController {
 		itemHashMap.put("salesman","销售员")
 		itemHashMap.put("supervisors","技术支持")
 		itemHashMap.put("analysts","数据分析员")
+		itemHashMap.put("examiners","数据分析审核员")
 		itemHashMap.put("sellers","审核员")
 		itemHashMap.put("analyStartDate","数据分析开始日期")
 		itemHashMap.put("analySendDate","数据分析给出日期")
@@ -1227,7 +1316,8 @@ class ProjectController {
 			head.append(projectItem.contains("salesman") ? ",\""+itemHashMap.get("salesman")+"\"" : "")
 			head.append(projectItem.contains("supervisors") ? ",\""+itemHashMap.get("supervisors")+"\"" : "")
 			head.append(projectItem.contains("analysts") ? ",\""+itemHashMap.get("analysts")+"\"" : "")
-			head.append(projectItem.contains("sellers") ? ",\""+itemHashMap.get("sellers")+"\"" : "")
+			head.append(projectItem.contains("examiners") ? ",\""+itemHashMap.get("examiners")+"\"" : "")
+			 head.append(projectItem.contains("sellers") ? ",\""+itemHashMap.get("sellers")+"\"" : "")
 			head.append(projectItem.contains("analyStartDate") ? ",\""+itemHashMap.get("analyStartDate")+"\"" : "")
 			head.append(projectItem.contains("analySendDate") ? ",\""+itemHashMap.get("analySendDate")+"\"" : "")
 			head.append(projectItem.contains("analySendWay") ? ",\""+itemHashMap.get("analySendWay")+"\"" : "")
@@ -1261,7 +1351,7 @@ class ProjectController {
 				head.deleteCharAt(headStr.indexOf('"'))
 			}
 		}else{
-			head.append("项目编号,项目登记日期,合同号,项目信息,优先级,状态,检测平台,检测类型,物种,芯片数/样本数,k3编号,批次,工作性质,销售员,技术支持,数据分析员,审核员,数据分析开始日期,数据分析给出日期,数据分析给出方式,工时(h),机时(h),到期时间,内部周期到期时间,过期原因,是否远程备份,数据备份日期,备份位置,是否管控完毕,备注1,建库方式,测序读长(bp),reads/样本,数据量(G)/样本,CASAVA拆分员,原始数据给出日期,原始数据给出方式")
+			head.append("项目编号,项目登记日期,合同号,项目信息,优先级,状态,检测平台,检测类型,物种,芯片数/样本数,k3编号,批次,工作性质,销售员,技术支持,数据分析员,数据分析审核员,审核员,数据分析开始日期,数据分析给出日期,数据分析给出方式,工时(h),机时(h),到期时间,内部周期到期时间,过期原因,是否远程备份,数据备份日期,备份位置,是否管控完毕,备注1,建库方式,测序读长(bp),reads/样本,数据量(G)/样本,CASAVA拆分员,原始数据给出日期,原始数据给出方式")
 		}
 		head.append("\n");
 		return head
@@ -1438,6 +1528,23 @@ class ProjectController {
 			}
 			bf.append("\"")
 		}
+		if(projectItem.contains("examiners")){
+			bf.append(",\"")
+			if(project.examiners){
+				Iterator iterAnalyst = project.examiners.iterator()
+				def index2=0
+				while(iterAnalyst.hasNext()){
+					def strExperiment = (User) iterAnalyst.next()
+					if(index2>0){
+					   bf.append("/"+strExperiment.name)
+					}else{
+					   index2++
+						bf.append(strExperiment.name)
+					}
+				}
+			}
+			bf.append("\"")
+		}
 		if(projectItem.contains("sellers")){
 			bf.append(",\"")
 			if(project.sellers){
@@ -1512,7 +1619,7 @@ class ProjectController {
 		def filePath
 		def f = request.getFile('myFile')
 		if(!f.empty) {
-			 def webRootDir = servletContext.getRealPath("/")
+			 def webRootDir = "${grailsApplication.config.project.file.upload.path}"
 			 def userDir = new File(webRootDir,"WEB-INF/upload/")
 			 if(!userDir.exists()){
 				 userDir.mkdirs()
@@ -1545,7 +1652,7 @@ class ProjectController {
 		def projectInstance =  Project.get(params.id)
 		fileName = projectInstance.fileName
 		
-		def webRootDir = servletContext.getRealPath("/")
+		def webRootDir = "${grailsApplication.config.project.file.upload.path}"
 		rootFilePath = new File(webRootDir, "WEB-INF/upload")
 		if(!rootFilePath.exists()){
 			rootFilePath.mkdirs();
@@ -1557,7 +1664,7 @@ class ProjectController {
 		response.contentType = ""
 		
 		def out = response.outputStream
-		def inputStream = new FileInputStream(filepath + "\\" + fileName)
+		def inputStream = new FileInputStream(filepath + "/" + fileName)
 		byte[] buffer = new byte[1024]
 		int i = -1
 		while ((i = inputStream.read(buffer)) != -1) {
@@ -1585,7 +1692,7 @@ class ProjectController {
 		int dir1 = hashcode&0xf; //0--15
 		int dir2 = (hashcode&0xf0)>>4; //0-15
 		//构造新的保存目录
-		String dir = savePath + "\\" + dir1 + "\\" + dir2 + "\\" + dir1 + "\\" + dir2; //upload\2\3\2\3
+		String dir = savePath + "/" + dir1 + "/" + dir2 + "/" + dir1 + "/" + dir2; //upload\2\3\2\3
 		//File既可以代表文件也可以代表目录
 		File file = new File(dir);
 		//如果目录不存在
@@ -1600,7 +1707,7 @@ class ProjectController {
 		boolean flag = false;
 		if(filename){
 			String filePath = findFileSavePathByFileName(filename,saveRootPath)
-			File file = new File(filePath + "\\" + filename);
+			File file = new File(filePath + "/" + filename);
 			// 路径为文件且不为空则进行删除
 			if (file.isFile() && file.exists()) {
 				file.delete();
@@ -1616,7 +1723,7 @@ class ProjectController {
 	   int hashcode = filename.hashCode();
 	   int dir1 = hashcode&0xf; //0--15
 	   int dir2 = (hashcode&0xf0)>>4; //0-15
-	   String dir = saveRootPath + "\\" + dir1 + "\\" + dir2 + "\\" + dir1 + "\\" + dir2; //upload\2\3\2\3
+	   String dir = saveRootPath + "/" + dir1 + "/" + dir2 + "/" + dir1 + "/" + dir2; //upload\2\3\2\3
 	   File file = new File(dir);
 	   if(!file.exists()){
 		   //创建目录
@@ -1636,6 +1743,13 @@ class ProjectController {
 		}
 		if(projectInstance.analysts){
 			Iterator iterSupervisor = projectInstance.analysts.iterator()
+			while(iterSupervisor.hasNext()){
+				def strExperiment = (User) iterSupervisor.next()
+				nameStr.append(strExperiment.username)
+			}
+		}
+		if(projectInstance.examiners){
+			Iterator iterSupervisor = projectInstance.examiners.iterator()
 			while(iterSupervisor.hasNext()){
 				def strExperiment = (User) iterSupervisor.next()
 				nameStr.append(strExperiment.username)
@@ -1672,6 +1786,13 @@ class ProjectController {
 		}
 		if(projectInstance.analysts){
 			Iterator iterSupervisor = projectInstance.analysts.iterator()
+			while(iterSupervisor.hasNext()){
+				def strExperiment = (User) iterSupervisor.next()
+				mailList.add(strExperiment.email)
+			}
+		}
+		if(projectInstance.examiners){
+			Iterator iterSupervisor = projectInstance.examiners.iterator()
 			while(iterSupervisor.hasNext()){
 				def strExperiment = (User) iterSupervisor.next()
 				mailList.add(strExperiment.email)
@@ -1727,6 +1848,24 @@ class ProjectController {
 				if(userEamilAndRoleMap.get(strExperiment.email)){
 					def roleList=userEamilAndRoleMap.get(strExperiment.email)
 					if(roleList.contains("数据分析员")){
+					}else{
+						roleList.addAll(roleList2)
+						userEamilAndRoleMap.put(strExperiment.email, roleList)
+					}
+				}else{
+					userEamilAndRoleMap.put(strExperiment.email, roleList2)
+				}
+			}
+		}
+		if(projectInstance.examiners){
+			Iterator iterSupervisor = projectInstance.examiners.iterator()
+			while(iterSupervisor.hasNext()){
+				def roleList2=new ArrayList<String>()
+				roleList2.add("数据分析审核员")
+				def strExperiment = (User) iterSupervisor.next()
+				if(userEamilAndRoleMap.get(strExperiment.email)){
+					def roleList=userEamilAndRoleMap.get(strExperiment.email)
+					if(roleList.contains("数据分析审核员")){
 					}else{
 						roleList.addAll(roleList2)
 						userEamilAndRoleMap.put(strExperiment.email, roleList)

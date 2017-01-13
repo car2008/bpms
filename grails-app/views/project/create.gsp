@@ -12,6 +12,22 @@
 <head>
 <meta name="layout" content="main" />
 <title><g:message code="default.create.label" args="${[message(code: 'project.label')]}" /></title>
+<style>
+	.contentBox{
+		width:90%;
+		float:left;
+	}
+	.sideBox{
+		width:10%;
+		max-height:120px;
+		float:right;
+	}
+	#create{
+		position:absolute;
+		right:17.5%;
+		bottom:11%;
+	}	
+</style>
 
 </head>
 <body>
@@ -22,56 +38,82 @@
 	</div>
 	<div class="container-fluid">
 		<div class="row-fluid">
-			<div class="span9">
-			<g:if test="${flash.message}">
-				<div class="alert alert-info">
-					${flash.message}
-				</div>
-			</g:if>
-			<g:if test="${flash.error}">
-				<div class="alert alert-error">
-					${flash.error}
-				</div>
-			</g:if>
-			<g:hasErrors bean="${projectInstance}">
-				<div class="alert alert-error">
-					<g:renderErrors bean="${projectInstance}" as="list" />
-				</div>
-			</g:hasErrors>
-			<g:form action="save" class="form-horizontal" method="post" enctype="multipart/form-data">
-				<g:render template="form" model="${[projectInstance: projectInstance]}"/>
-				<div class="control-group">
-					<div class="controls">
-						<g:submitButton id="create" name="create" class="btn btn-primary" value="${message(code: 'default.button.create.label')}" onclick="checkfile()"/>
+			<div class="contentBox">
+				<g:if test="${flash.message}">
+					<div class="alert alert-info">
+						${flash.message}
 					</div>
-				</div>
-			</g:form>
+				</g:if>
+				<g:if test="${flash.error}">
+					<div class="alert alert-error">
+						${flash.error}
+					</div>
+				</g:if>
+				<g:hasErrors bean="${projectInstance}">
+					<div class="alert alert-error">
+						<g:renderErrors bean="${projectInstance}" as="list" />
+					</div>
+				</g:hasErrors>
+				<g:form action="save" class="form-horizontal" method="post" enctype="multipart/form-data" style="height:100%;position:relative;">
+					<g:render template="form" model="${[projectInstance: projectInstance]}"/>
+					<div class="control-group">
+						<div class="controls">
+							<g:submitButton id="create" name="create" class="btn btn-primary" value="${message(code: 'default.button.create.label')}" onclick="checkfile()"/>
+						</div>
+					</div>
+				</g:form>
 			</div>
 			<!--/span-->
-			<div class="span3" style="width:15%;">
+			<div class="sideBox">
 				<g:render template="sidebar"/> 
 			</div>
 			<!--/span-->
 		</div>
 	</div>
 	<script type="text/javascript">
-		//window.onload=function(){
-			// 每发一个请求，应该创建一个xhr对象 
-	   		//var xhr = new XMLHttpRequest();
-	   		//xhr.onreadystatechange = function() {
-	   			// 响应完全返回, 并且响应成功了
-	   		//	if(xhr.readyState == 4 && xhr.status == 200) {
-	   		//		var text = xhr.responseText;
-	   		//		text=text.replace("[", "");
-	   		//		text=text.replace("]", "");
-	   		//		//console.log(text);
-	   		//		document.getElementById("title").value=parseInt(text)+1;
-	   		//	}
-	   		//};
-	   		
-	    	//xhr.open("GET", "findMaxId", true);//http://localhost:8080/bpms/project/findMaxId
-	    	//xhr.send();
-		//}
+	function transNumToDate(id){
+		var dayNum;
+		var valueStr;
+		var value
+		if(id=="dueTimeNum"){
+			dayNum=document.getElementById("dueTimeNum");
+			valueStr=dayNum.value;
+		}
+		if(id=="innerDueTimeNum"){
+			dayNum=document.getElementById("innerDueTimeNum");
+			valueStr=dayNum.value;
+		}
+		if(valueStr==null || ""==valueStr){
+		}else if(!isNaN(valueStr)){
+			value=parseInt(valueStr);
+			if(value > 0 && value < 365){
+				var xhr = new XMLHttpRequest();
+		   		xhr.onreadystatechange = function() {
+		   			// 响应完全返回, 并且响应成功了
+		   			if(xhr.readyState == 4 && xhr.status == 200) {
+		   				var text = xhr.responseText;
+		   				text=text.replace("[", "");
+		   				text=text.replace("]", "");
+		   				//console.log(text);
+		   				if(id=="dueTimeNum"){
+		   					document.getElementById("dueTime").value=text;
+		   				}
+		   				if(id=="innerDueTimeNum"){
+		   					document.getElementById("innerDueDate").value=text;
+		   				}
+		   			}
+		   		};
+		   		
+		    	xhr.open("GET", "transNumToDate/"+value, true);//http://localhost:8080/bpms/project/findMaxId
+		    	xhr.send();
+			}else{
+				alert('请输入1-365之间的正整数 ');
+			}
+		}else{
+			alert('请输入1-365之间的正整数 ');
+		}
+		
+      }
 	</script>
 </body>
 </html>
