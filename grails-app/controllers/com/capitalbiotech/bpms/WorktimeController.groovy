@@ -104,13 +104,14 @@ class WorktimeController {
         def projectInstance = Project.findByTitle(params.title)
         worktimeInstance.project = projectInstance
 		
-		worktimeInstance.addToCompleters(springSecurityService.currentUser)
+		if(!params.completers){
+			worktimeInstance.addToCompleters(springSecurityService.currentUser)
+		}
 		
         if (!worktimeInstance.hasErrors() && worktimeInstance.save(flush: true)) {
             flash.message = "${message(code: 'default.created.message', args: [message(code: 'message.label', default: 'Message'), ''])}"
             redirect(controller: "worktime", action: "list", id: projectInstance.id)
-        }
-        else {
+        }else {
             flash.error = renderErrors(bean: worktimeInstance, as: "list")
             redirect(controller: "worktime", action: "list", id: projectInstance.id, model: [worktimeInstance: worktimeInstance])
         }
@@ -119,6 +120,8 @@ class WorktimeController {
     def edit = {
 		def workcontentInstanceList = Workcontent.list()
 		def platformInstanceList = Platform.list()
+		def analystRole = Role.findByAuthority("ROLE_ANALYST")
+		def analystInstanceList = UserRole.findAllByRole(analystRole).user
         def worktimeInstance = Worktime.get(params.id)
         if (!worktimeInstance) {
             flash.message = "${message(code: 'default.not.found.message', args: [message(code: 'message.label', default: 'Message'), params.id])}"
@@ -127,19 +130,21 @@ class WorktimeController {
 			def projectInstance=worktimeInstance.project
 			def workcontentInstance=worktimeInstance.workcontents
 			def platformInstance=worktimeInstance.platforms
-            return [platformInstance:platformInstance,platformInstanceList:platformInstanceList,workcontentInstanceList:workcontentInstanceList,worktimeInstance: worktimeInstance,projectInstance:projectInstance,workcontentInstance:workcontentInstance]
+            return [platformInstance:platformInstance,platformInstanceList:platformInstanceList,workcontentInstanceList:workcontentInstanceList,worktimeInstance: worktimeInstance,projectInstance:projectInstance,workcontentInstance:workcontentInstance,analystInstanceList:analystInstanceList]
         }
     }
 
     def update = {
         def worktimeInstance = Worktime.get(params.id)
+		def analystRole = Role.findByAuthority("ROLE_ANALYST")
+		def analystInstanceList = UserRole.findAllByRole(analystRole).user
         if (worktimeInstance) {
             if (params.version) {
                 def version = params.version.toLong()
                 if (worktimeInstance.version > version) {
                     
                     worktimeInstance.errors.rejectValue("version", "default.optimistic.locking.failure", [message(code: 'message.label', default: 'Message')] as Object[], "Another user has updated this Message while you were editing")
-                    render(view: "edit")
+                    render(view: "edit",model: [analystInstanceList: analystInstanceList])
                     return
                 }
             }
@@ -148,6 +153,7 @@ class WorktimeController {
 			}
 			worktimeInstance.workcontents.clear()
 			worktimeInstance.platforms.clear()
+			worktimeInstance.completers.clear()
             worktimeInstance.properties = params
 			def projectInstance=worktimeInstance.project
             if (!worktimeInstance.hasErrors() && worktimeInstance.save(flush: true)) {
@@ -155,7 +161,7 @@ class WorktimeController {
                 redirect(action: "list", id: projectInstance.id)
             }
             else {
-                render(view: "edit")
+                render(view: "edit",model: [analystInstanceList: analystInstanceList])
             }
         }
         else {
@@ -171,8 +177,11 @@ class WorktimeController {
 		
 		def workcontentInstanceList = Workcontent.list()
 		def platformInstanceList = Platform.list()
-
-		return [platformInstanceList:platformInstanceList,worktimeInstance: worktimeInstance,workcontentInstanceList:workcontentInstanceList,projectInstance:projectInstance,]
+		
+		def analystRole = Role.findByAuthority("ROLE_ANALYST")
+		def analystInstanceList = UserRole.findAllByRole(analystRole).user
+		
+		return [platformInstanceList:platformInstanceList,worktimeInstance: worktimeInstance,workcontentInstanceList:workcontentInstanceList,projectInstance:projectInstance,analystInstanceList:analystInstanceList,]
 		
 	}
 
@@ -289,16 +298,16 @@ class WorktimeController {
 		if(s1.endsWith("WHERE ")){
 			s1=s1.replaceFirst("WHERE","")
 		}
-		println s1
+		//println s1
 		stringBuf.append("ORDER BY worktime.${params.sort} ${params.order} ")
 		def s2=stringBuf.toString()
 		if(s2.contains("WHERE AND")){
 			s2=s2.replaceFirst("AND","")
 		}
-		println s2
+		//println s2
 		if(paramMap1){
 			worktimeInstanceTotalList = Worktime.executeQuery(s1,paramMap1)
-			println worktimeInstanceTotalList
+			//println worktimeInstanceTotalList
 			paramMap1.put("offset",params.offset)
 			paramMap1.put("max",params.max)
 			worktimeInstanceList = Worktime.executeQuery(s2,paramMap1)

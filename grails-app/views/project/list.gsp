@@ -9,23 +9,24 @@
 </title>
 <style type="text/css">
 #Layer1 {
-    height: 470px;
-    width: 450px;
+    height: 540px;
+    width: 560px;
     border: 5px solid #999;
     margin-right: auto;
     margin-left: auto;
     z-index: 50;
     display: none;
     position: fixed;
-    top:20%;
-    left:30%; 
+    top:15%;
+    left:50%;
+    transform:translate(-50%,0%); 
     right:auto; 
     bottom:auto; 
     background-color: #FFF;
 }
 #Layer1 #win_top {
     height: 30px;
-    width: 450px;
+    width: 560px;
     border-bottom-width: 1px;
     border-bottom-style: solid;
     border-bottom-color: #999;
@@ -81,6 +82,20 @@
 	font-family:"Times New Roman",Georgia,Serif;
 	 line-height:25px;
 	 font-size:10px;
+}
+.pagination ul li.disabled{ 
+   display:none; 
+}
+.pagination a{ 
+   border:1px solid #dddddd; 
+   padding:6px 5px 6px 5px; 
+   line-height:30px; 
+}
+#example th,td{ 
+   white-space: nowrap; 
+}
+#showduetimetable th,td{
+	white-space: nowrap; 
 }
 </style>
 </head>
@@ -164,6 +179,7 @@
 								<th  >${message(code: 'project.salesman.label')}</th>
 								<th  >${message(code: 'project.supervisors.label')}</th>
 								<th  >${message(code: 'project.analysts.label')}</th>
+								<th  >${message(code: 'project.examiners.label')}</th>
 								<th  >${message(code: 'project.sellers.label')}</th>
 								<th  >${message(code: 'project.analyStartDate.label')}</th>
 								<th  >${message(code: 'project.analySendDate.label')}</th>
@@ -189,7 +205,7 @@
 							<g:form id="searchProjectByColumn" name="searchProjectByColumn"  action="searchProjectByColumn" style="margin-bottom:0;">
 							<tr id="secondRow">
 								<td></td>
-						        <td>
+						        <td style="width:187px;">
 						        	<span><input type="text" name="beginSearchDate" id="beginSearchDate" value="${beginSearchDate}" style="width:75px;" onchange="searchDate(this.id)"/></span>
 								  ~ <span><input type="text" name="endSearchDate" id="endSearchDate" value="${endSearchDate}" style="width:75px;" onchange="searchDate(this.id)"/></span>
 						        </td>
@@ -285,6 +301,14 @@
 						    		</select>
 						    	</td>
 						    	<td>
+						    		<select id="q15" name="q15" data-index="13" style="width:122px;" onchange="search(this.id)">
+						    			<option value="" selected></option>
+						    			<g:each in="${examinerInstanceList}" var="examinerInstance">
+											<option value="${examinerInstance?.username}" ${examinerInstance?.username==params.q15 ? 'selected' : ''}>${examinerInstance?.name}</option>
+										</g:each>
+						    		</select>
+						    	</td>
+						    	<td>
 						    		<select id="q14" name="q14" data-index="13" style="width:122px;" onchange="search(this.id)">
 						    			<option value="" selected></option>
 						    			<g:each in="${sellerInstanceList}" var="sellerInstance">
@@ -331,233 +355,164 @@
 							</g:else>
 									<td  >&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 									<g:checkBox id="check" name="sub" value="${projectInstance.id}" checked="false" onclick="change()"/>
-										<small>
-											<g:if test="${noticeInstanceMap[projectInstance.id] != null && noticeInstanceMap[projectInstance.id] > 0}">
-												<span class="badge badge-important">
-													${noticeInstanceMap[projectInstance.id]}条
+										<g:if test="${noticeInstanceMap[projectInstance.id] != null && noticeInstanceMap[projectInstance.id] > 0}">
+											<span class="badge badge-important">
+												${noticeInstanceMap[projectInstance.id]}条
+											</span>
+										</g:if>
+										<g:if test="${remaindingDayMap[projectInstance.id] != null && ""!= remaindingDayMap[projectInstance.id]}">
+											<g:if test="${remaindingDayMap[projectInstance.id] > 5 }">
+												<span class="badge badge-info">
+													${remaindingDayMap[projectInstance.id]}天
 												</span>
 											</g:if>
-											<g:if test="${remaindingDayMap[projectInstance.id] != null && ""!= remaindingDayMap[projectInstance.id]}">
-												<g:if test="${remaindingDayMap[projectInstance.id] > 5 }">
-													<span class="badge badge-info">
-														${remaindingDayMap[projectInstance.id]}天
-													</span>
-												</g:if>
-												<g:else>
-													<span class="badge badge-important">
-														${remaindingDayMap[projectInstance.id]}天
-													</span>
-												</g:else>
-											</g:if>
-										</small>
+											<g:else>
+												<span class="badge badge-important">
+													${remaindingDayMap[projectInstance.id]}天
+												</span>
+											</g:else>
+										</g:if>
 									</td>
 									<td  >
-										<small>
-											<g:formatDate format="yyyy-MM-dd" date="${projectInstance?.projectCreateDate}" />
-										</small>
+										<g:formatDate format="yyyy-MM-dd" date="${projectInstance?.projectCreateDate}" />
 									</td>
 									<td  >
-										<small>
-											<g:link action="show" id="${projectInstance.id}">
-												${projectInstance?.contract}
-											</g:link>
-										</small>
+										<g:link action="show" id="${projectInstance.id}">
+											${projectInstance?.contract}
+										</g:link>
 									</td>
 									<td  >
-										<small>
-											<g:link action="show" id="${projectInstance.id}">
-												${projectInstance?.information}
-											</g:link>
-										</small>
+										<g:link action="show" id="${projectInstance.id}">
+											${projectInstance?.information}
+										</g:link>
 									</td>
 									<td  >
-										<small>
-											<bpms:projectLevelLabel level="${projectInstance?.level}" />
-										</small>
+										<bpms:projectLevelLabel level="${projectInstance?.level}" />
 									</td>
 									<td  >
-										<small>
-											<g:message code="project.status.${projectInstance?.status}.label" />
-										</small>
+										<g:message code="project.status.${projectInstance?.status}.label" />
 									</td>
 									
 									<td  >
-										<small>
-											<g:each in="${projectInstance?.platforms}" var="platformInstance" status="platformIndex">
-												<g:if test="${platformIndex > 0}">
-													<br />
-												</g:if>
-												${platformInstance.title}
-											</g:each>
-										</small>
+										<g:each in="${projectInstance?.platforms}" var="platformInstance" status="platformIndex">
+											<g:if test="${platformIndex > 0}">
+												<br />
+											</g:if>
+											${platformInstance.title}
+										</g:each>
 									</td>
 									<td  >
-										<small>
-											<g:each in="${projectInstance?.experiments}" var="experimentInstance" status="experimentIndex">
-												<g:if test="${experimentIndex > 0}">
-													<br />
-												</g:if>
-												${experimentInstance.title}
-											</g:each>
-										</small>
+										<g:each in="${projectInstance?.experiments}" var="experimentInstance" status="experimentIndex">
+											<g:if test="${experimentIndex > 0}">
+												<br />
+											</g:if>
+											${experimentInstance.title}
+										</g:each>
 									</td>
 									<td  >
-										<small>
-												${projectInstance?.species}
-										</small>
+										${projectInstance?.species}
 									</td>
 									<td  >
-										<small>
-												${projectInstance?.samplesize}
-										</small>
+										${projectInstance?.samplesize}
 									</td>
 									<td  >
-										<small>
-												${projectInstance?.k3number}
-										</small>
+										${projectInstance?.k3number}
 									</td>
 									<td  >
-										<small>
-												${projectInstance?.batch}
-										</small>
+										${projectInstance?.batch}
 									</td>
 									<td  >
-										<small>
-											<g:each in="${projectInstance?.analyses}" var="analysisInstance" status="analysisIndex">
-												<g:if test="${analysisIndex > 0}">
-													<br />
-												</g:if>
-												${analysisInstance.title}
-											</g:each>
-										</small>
+										<g:each in="${projectInstance?.analyses}" var="analysisInstance" status="analysisIndex">
+											<g:if test="${analysisIndex > 0}">
+												<br />
+											</g:if>
+											${analysisInstance.title}
+										</g:each>
 									</td>
 									<td  >
-										<small>
-												${projectInstance?.salesman}
-										</small>
+										${projectInstance?.salesman}
 									</td>
 									<td  >
-										<small>
-											<g:each in="${projectInstance?.supervisors}" var="supervisor">
-												${supervisor.name}
-											</g:each>
-										</small>
+										<g:each in="${projectInstance?.supervisors}" var="supervisor">
+											${supervisor.name}
+										</g:each>
 									</td>
 									<td  >
-										<small>
-											<g:each in="${projectInstance?.analysts}" var="analyst">
-												${analyst.name}
-											</g:each>
-										</small>
+										<g:each in="${projectInstance?.analysts}" var="analyst">
+											${analyst.name}
+										</g:each>
 									</td>
 									<td  >
-										<small>
-											<g:each in="${projectInstance?.sellers}" var="seller">
-												${seller.name}
-											</g:each>
-										</small>
+										<g:each in="${projectInstance?.examiners}" var="examiner">
+											${examiner.name}
+										</g:each>
 									</td>
 									<td  >
-										<small>
-											<g:formatDate format="yyyy-MM-dd" date="${projectInstance?.analyStartDate}" />
-										</small>
+										<g:each in="${projectInstance?.sellers}" var="seller">
+											${seller.name}
+										</g:each>
 									</td>
 									<td  >
-										<small>
-											<g:formatDate format="yyyy-MM-dd" date="${projectInstance?.analySendDate}" />
-										</small>
+										<g:formatDate format="yyyy-MM-dd" date="${projectInstance?.analyStartDate}" />
 									</td>
 									<td  >
-										<small>
-												<g:message code="project.way.${projectInstance?.analySendWay}.label" />
-										</small>
+										<g:formatDate format="yyyy-MM-dd" date="${projectInstance?.analySendDate}" />
 									</td>
 									<td  >
-										<small>
-												${projectInstance?.manHour}
-										</small>
+										<g:message code="project.way.${projectInstance?.analySendWay}.label" />
 									</td>
 									<td  >
-										<small>
-												${projectInstance?.machineHour}
-										</small>
+										${projectInstance?.manHour}
 									</td>
 									<td  >
-										<small>
-											<g:formatDate format="yyyy-MM-dd" date="${projectInstance?.dueTime}" />
-										</small>
+										${projectInstance?.machineHour}
 									</td>
 									<td  >
-										<small>
-											<g:formatDate format="yyyy-MM-dd" date="${projectInstance?.innerDueDate}" />
-										</small>
+										<g:formatDate format="yyyy-MM-dd" date="${projectInstance?.dueTime}" />
 									</td>
 									<td  >
-										<small>
-												${projectInstance?.overdueReason}
-										</small>
+										<g:formatDate format="yyyy-MM-dd" date="${projectInstance?.innerDueDate}" />
 									</td>
 									<td  >
-										<small>
-												<g:message code="project.isRemoted.${projectInstance?.isRemoted}.label" />
-										</small>
+										${projectInstance?.overdueReason}
 									</td>
 									<td  >
-										<small>
-											<g:formatDate format="yyyy-MM-dd" date="${projectInstance?.backupDate}" />
-										</small>
+										<g:message code="project.isRemoted.${projectInstance?.isRemoted}.label" />
 									</td>
 									<td  >
-										<small>
-												${projectInstance?.backupLocation}
-										</small>
+										<g:formatDate format="yyyy-MM-dd" date="${projectInstance?.backupDate}" />
 									</td>
 									<td  >
-										<small>
-												<g:message code="project.isControled.${projectInstance?.isControled}.label" />
-										</small>
+										${projectInstance?.backupLocation}
 									</td>
 									<td  >
-										<small>
-												${projectInstance?.comment1}
-										</small>
+										<g:message code="project.isControled.${projectInstance?.isControled}.label" />
 									</td>
 									<td  >
-										<small>
-												<g:message code="project.way.${projectInstance?.libraryBuildWay}.label" />
-										</small>
+										${projectInstance?.comment1}
 									</td>
 									<td  >
-										<small>
-												${projectInstance?.readLength}
-										</small>
+										<g:message code="project.way.${projectInstance?.libraryBuildWay}.label" />
 									</td>
 									<td  >
-										<small>
-												${projectInstance?.readsNum}
-										</small>
+										${projectInstance?.readLength}
 									</td>
 									<td  >
-										<small>
-												${projectInstance?.dataSize}
-										</small>
+										${projectInstance?.readsNum}
 									</td>
 									<td  >
-										<small>
-											<g:each in="${projectInstance?.spliters}" var="spliter">
-												${spliter.name}
-											</g:each>
-										</small>
+										${projectInstance?.dataSize}
 									</td>
 									<td  >
-										<small>
-											<g:formatDate format="yyyy-MM-dd" date="${projectInstance?.metaSendData}" />
-										</small>
+										<g:each in="${projectInstance?.spliters}" var="spliter">
+											${spliter.name}
+										</g:each>
 									</td>
 									<td  >
-										<small>
-												<g:message code="project.way.${projectInstance?.metaSendWay}.label" />
-										</small>
+										<g:formatDate format="yyyy-MM-dd" date="${projectInstance?.metaSendData}" />
+									</td>
+									<td  >
+										<g:message code="project.way.${projectInstance?.metaSendWay}.label" />
 									</td>
 								</tr>
 							</g:each>
@@ -575,9 +530,7 @@
 							</g:form>
 						</tbody>
 					</table>
-					<div class="pagination">
-						<bpms:paginate total="${projectInstanceTotal}" params="${params}" />
-					</div>
+					
 			</div>
 			<div class="span3" style="width:11%;">
 				<g:render template="sidebar"/> 
@@ -635,6 +588,9 @@
 	</table>
 			</div>
 		</div>
+		<div class="pagination">
+			<bpms:paginate total="${projectInstanceTotal}" params="${params}" />
+		</div>
 		<div id="shade"></div>
 		<div id="Layer1">
 		  <div id="win_top">请选择要导出的列:<a href="#" onClick="shade.style.display='none';Layer1.style.display='none'">关闭</a></div>
@@ -662,70 +618,68 @@
 		  	<table id="tableToExcel"  border="1">
 		  		<tr>
 				    <td><g:checkBox name="sub1" checked="false" value="title"/>&nbsp;项目编号</td>
-				    <td><g:checkBox name="sub1" checked="false" value="analysts"/>&nbsp;数据分析员</td>
-				    <td><g:checkBox name="sub1" checked="false" value="libraryBuildWay"/>&nbsp;建库方式</td>
+				    <td><g:checkBox name="sub1" checked="false" value="k3number"/>&nbsp;k3编号</td>
+				    <td><g:checkBox name="sub1" checked="false" value="analySendWay"/>&nbsp;分析给出方式</td>
+				    <td><g:checkBox name="sub1" checked="false" value="isControled"/>&nbsp;是否管控完毕</td>
+				    
 				</tr>
 				<tr>
 				    <td><g:checkBox name="sub1" checked="false" value="projectCreateDate"/>&nbsp;登记日期</td>
-				    <td><g:checkBox name="sub1" checked="false" value="sellers"/>&nbsp;审核员</td>
-				    <td><g:checkBox name="sub1" checked="false" value="readLength"/>&nbsp;测序读长</td>
+				    <td><g:checkBox name="sub1" checked="false" value="batch"/>&nbsp;批次</td>
+				   	<td><g:checkBox name="sub1" checked="false" value="manHour"/>&nbsp;工时</td>
+					<td><g:checkBox name="sub1" checked="false" value="comment1"/>&nbsp;备注1</td>
 				</tr>
 				<tr>
 				    <td><g:checkBox name="sub1" checked="false" value="contract"/>&nbsp;合同号</td>
-				    <td><g:checkBox name="sub1" checked="false" value="analyStartDate"/>&nbsp;分析开始日期</td>
-				    <td><g:checkBox name="sub1" checked="false" value="readsNum"/>&nbsp;reads/样本</td>
+				    <td><g:checkBox name="sub1" checked="false" value="analyses"/>&nbsp;工作性质</td>
+				    <td><g:checkBox name="sub1" checked="false" value="machineHour"/>&nbsp;机时</td>
+				    <td><g:checkBox name="sub1" checked="false" value="libraryBuildWay"/>&nbsp;建库方式</td>
+				   
 				</tr>
 				<tr>
 				    <td><g:checkBox name="sub1" checked="false" value="information"/>&nbsp;项目信息</td>
-				    <td><g:checkBox name="sub1" checked="false" value="analySendDate"/>&nbsp;分析给出日期</td>
-				    <td><g:checkBox name="sub1" checked="false" value="dataSize"/>&nbsp;数据量</td>
+				    <td><g:checkBox name="sub1" checked="false" value="salesman"/>&nbsp;销售员</td>
+				    <td><g:checkBox name="sub1" checked="false" value="dueTime"/>&nbsp;到期时间</td>
+				    <td><g:checkBox name="sub1" checked="false" value="readLength"/>&nbsp;测序读长</td>
+				
 				</tr>
 				<tr>
 				    <td><g:checkBox name="sub1" checked="false" value="level"/>&nbsp;优先级</td>
-				    <td><g:checkBox name="sub1" checked="false" value="analySendWay"/>&nbsp;分析给出方式</td>
-				    <td><g:checkBox name="sub1" checked="false" value="spliters"/>&nbsp;CASAVA拆分员</td>
+				    <td><g:checkBox name="sub1" checked="false" value="supervisors"/>&nbsp;技术支持</td>
+				    <td><g:checkBox name="sub1" checked="false" value="innerDueDate"/>&nbsp;内部到期时间</td>
+				    <td><g:checkBox name="sub1" checked="false" value="readsNum"/>&nbsp;reads/样本</td>
+				
 				</tr>
 				<tr>
 				    <td><g:checkBox name="sub1" checked="false" value="status"/>&nbsp;状态</td>
-				    <td><g:checkBox name="sub1" checked="false" value="manHour"/>&nbsp;工时</td>
-				    <td><g:checkBox name="sub1" checked="false" value="metaSendData"/>&nbsp;原始数据发送时间</td>
+				    <td><g:checkBox name="sub1" checked="false" value="analysts"/>&nbsp;数据分析员</td>
+				    <td><g:checkBox name="sub1" checked="false" value="overdueReason"/>&nbsp;过期原因</td>
+				    <td><g:checkBox name="sub1" checked="false" value="dataSize"/>&nbsp;数据量</td>
 				</tr>
 				<tr>
 				    <td><g:checkBox name="sub1" checked="false" value="platforms"/>&nbsp;检测平台</td>
-				    <td><g:checkBox name="sub1" checked="false" value="machineHour"/>&nbsp;机时</td>
-				    <td><g:checkBox name="sub1" checked="false" value="metaSendWay"/>&nbsp;原始数据给出方式</td>
+				    <td><g:checkBox name="sub1" checked="false" value="sellers"/>&nbsp;审核员</td>
+				    <td><g:checkBox name="sub1" checked="false" value="isRemoted"/>&nbsp;是否远程备份</td>
+				    <td><g:checkBox name="sub1" checked="false" value="spliters"/>&nbsp;CASAVA拆分员</td>
+					
 				</tr>
 				<tr>
 				    <td><g:checkBox name="sub1" checked="false" value="experiments"/>&nbsp;检测类型</td>
-				    <td><g:checkBox name="sub1" checked="false" value="dueTime"/>&nbsp;到期时间</td>
+				    <td><g:checkBox name="sub1" checked="false" value="analyStartDate"/>&nbsp;分析开始日期</td>
+				    <td><g:checkBox name="sub1" checked="false" value="backupDate"/>&nbsp;备份日期</td>
+				  	<td><g:checkBox name="sub1" checked="false" value="metaSendData"/>&nbsp;原始数据发送时间</td>
+					
 				</tr>
 				<tr>
 				    <td><g:checkBox name="sub1" checked="false" value="species"/>&nbsp;物种</td>
-				    <td><g:checkBox name="sub1" checked="false" value="innerDueDate"/>&nbsp;内部到期时间</td>
+				    <td><g:checkBox name="sub1" checked="false" value="analySendDate"/>&nbsp;分析给出日期</td>
+				    <td><g:checkBox name="sub1" checked="false" value="backupLocation"/>&nbsp;备份位置</td>
+				    <td><g:checkBox name="sub1" checked="false" value="metaSendWay"/>&nbsp;原始数据给出方式</td>
 				</tr>
 				<tr>
 				    <td><g:checkBox name="sub1" checked="false" value="samplesize"/>&nbsp;芯片/样本数</td>
-				    <td><g:checkBox name="sub1" checked="false" value="overdueReason"/>&nbsp;过期原因</td>
-				</tr>
-				<tr>
-				    <td><g:checkBox name="sub1" checked="false" value="k3number"/>&nbsp;k3编号</td>
-				    <td><g:checkBox name="sub1" checked="false" value="isRemoted"/>&nbsp;是否远程备份</td>
-				</tr>
-				<tr>
-				    <td><g:checkBox name="sub1" checked="false" value="batch"/>&nbsp;批次</td>
-				    <td><g:checkBox name="sub1" checked="false" value="backupDate"/>&nbsp;备份日期</td>
-				</tr>
-				<tr>
-				    <td><g:checkBox name="sub1" checked="false" value="analyses"/>&nbsp;工作性质</td>
-				    <td><g:checkBox name="sub1" checked="false" value="backupLocation"/>&nbsp;备份位置</td>
-				</tr>
-				<tr>
-				    <td><g:checkBox name="sub1" checked="false" value="salesman"/>&nbsp;销售员</td>
-				    <td><g:checkBox name="sub1" checked="false" value="isControled"/>&nbsp;是否管控完毕</td>
-				</tr>
-				<tr>
-				    <td><g:checkBox name="sub1" checked="false" value="supervisors"/>&nbsp;技术支持</td>
-				    <td><g:checkBox name="sub1" checked="false" value="comment1"/>&nbsp;备注1</td>
+				    <td><g:checkBox name="sub1" checked="false" value="examiners"/>&nbsp;数据分析审核员</td>
+				    
 				</tr>
 		  	</table>
 		  		<br />
@@ -880,16 +834,19 @@
 		});
 		document.getElementById("daynum").onblur=function(){
 			var val = document.getElementById('daynum');
-			if(!isNaN(val.value)){
-				var value = parseInt(document.getElementById('daynum').value);
-	            if(value > 0 && value < 21){
-					document.getElementById("searchableDue").submit()
-	            }else{
-	                alert('请输入1-20之间的正整数 ');
-					document.getElementById('daynum').value="";
-	            }
+			if(""==val.value || null==val.value){
 			}else{
-			   alert('请输入1-20之间的正整数 ');
+				if(!isNaN(val.value)){
+					var value = parseInt(document.getElementById('daynum').value);
+		            if(value > 0 && value < 21){
+						document.getElementById("searchableDue").submit()
+		            }else{
+		                alert('请输入1-20之间的正整数 ');
+						document.getElementById('daynum').value="";
+		            }
+				}else{
+				   alert('请输入1-20之间的正整数 ');
+				}
 			}
 		}
 	</script>

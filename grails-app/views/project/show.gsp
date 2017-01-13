@@ -9,7 +9,7 @@
 <body>
 	<div class="row-fluid">
 		<div class="span12 bpms-header">
-			<g:message code="project.label" />: ${projectInstance?.title}
+			<g:message code="project.label" />: ${projectInstance?.information}
 			<div class="pull-right">
 				<g:message code="project.status.${projectInstance?.status}.label" />
 			</div>
@@ -35,9 +35,9 @@
 					</div>
 				</g:hasErrors>
 				<g:hiddenField name="flag" id="flag" value="${flag }" />
-				<IFRAME  scrolling="yes" width="100%" height="400" frameBorder="0" id="frmright" name="frmright" src="../../worktime/list/${projectInstance?.id}"  allowTransparency="true"></IFRAME>
+				<IFRAME  scrolling="yes" width="100%" height="600" frameBorder="0" id="frmright" name="frmright" src="../../worktime/list/${projectInstance?.id}"  allowTransparency="true"></IFRAME>
 				
-				<g:form controller="message" action="save" method="POST" >
+				<g:form controller="message" action="save" method="POST" style="margin-left:20px;">
 					<g:hiddenField id="projectId" name="projectId" value="${projectInstance?.id}" />
 					<textarea id="content" name="content" rows="5" class="input-block-level"></textarea>
 					<button class="btn btn-primary" type="submit">

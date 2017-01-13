@@ -15,7 +15,7 @@ import com.capitalbiotech.bpms.Worktime
 class BootStrap {
     def springSecurityService
 
-    def init = { servletContext ->
+    def init = { /*servletContext ->
         if (0 == Preference.count()) {
             createPreferences()
         }
@@ -45,7 +45,7 @@ class BootStrap {
 		}
         if(0 == Track.count()) {
             createTracks()
-        }
+        }*/
     }
 
     def destroy = {

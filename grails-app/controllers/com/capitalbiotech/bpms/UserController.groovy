@@ -214,6 +214,7 @@ class UserController {
 			userInstance.email = params.email
 			if(SpringSecurityUtils.ifAnyGranted('ROLE_ADMIN')){
 				userInstance.username = params.username
+				userInstance.avatar = params.avatar
 			}
 			
 			if (!userInstance.hasErrors() && userInstance.save(flush: true)) {

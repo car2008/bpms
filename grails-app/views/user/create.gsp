@@ -88,6 +88,11 @@
 							</label>
 							<br />
 							<label class="checkbox inline"> <input type="checkbox"
+								name="authority" value="ROLE_EXAMINER">
+								<g:message code="role.authority.ROLE_EXAMINER.label" />
+							</label>
+							<br />
+							<label class="checkbox inline"> <input type="checkbox"
 								name="authority" value="ROLE_SUPERVISOR">
 								<g:message code="role.authority.ROLE_SUPERVISOR.label" />
 							</label>

@@ -1,5 +1,5 @@
 username	password	name	email	avatar	roles	END
-leiwang	123456	王雷	3330946481@qq.com	avatar_02	ROLE_USER,ROLE_ADMIN,ROLE_SELLER	END
+leiwang	123456	王雷	leiwang@capitalbiotech.com	avatar_02	ROLE_USER,ROLE_ADMIN,ROLE_SELLER	END
 chenchen	123456	陈辰	chenchen@capitalbiotech.com	avatar_13	ROLE_USER,ROLE_ANALYST	END
 yanpeng	123456	彭岩	yanpeng@capitalbiotech.com	avatar_07	ROLE_USER,ROLE_ANALYST,ROLE_SUPERVISOR	END
 caiyanzhang	123456	张彩艳	caiyanzhang@capitalbiotech.com	avatar_07	ROLE_USER,ROLE_ANALYST	END
@@ -17,21 +17,21 @@ binbinfang	123456	方彬彬	binbinfang@capitalbiotech.com	avatar_01	ROLE_USER,RO
 shijunpu	123456	浦世珺	shijunpu@capitalbiotech.com	avatar_01	ROLE_USER,ROLE_ANALYST	END
 jinyitian	123456	田津伊	jinyitian@capitalbiotech.com	avatar_01	ROLE_USER,ROLE_SELLER,ROLE_ANALYST	END
 shengchen	123456	陈胜	shengchen@capitalbiotech.com	avatar_13	ROLE_USER,ROLE_ANALYST	END
-wenxingli	123456	李文星	wenxingli@capitalbiotech.com	avatar_01	ROLE_USER	END
-jianqingzhao	123456	赵建晴	jianqingzhao@capitalbiotech.com	avatar_01	ROLE_USER	END
+wenxingli	123456	李文星	wenxingli1@capitalbiotech.com	avatar_01	ROLE_USER,ROLE_SUPERVISOR	END
+jianqingzhao	123456	赵建晴	jianqingzhao1@capitalbiotech.com	avatar_01	ROLE_USER,ROLE_SUPERVISOR	END
 jieliu	123456	刘杰	1024521227@qq.com	avatar_01	ROLE_USER,ROLE_SUPERVISOR	END
-bochen	123456	陈波	jieliu2@capitalbiotech.com	avatar_01	ROLE_USER	END
+bochen	123456	陈波	jieliu2@capitalbiotech.com	avatar_01	ROLE_USER,ROLE_SELLER,ROLE_ANALYST	END
 minzhao	123456	赵敏	jieliu3@capitalbiotech.com	avatar_01	ROLE_USER	END
 bolaimingchuang	123456	博莱明创	12@capitalbiotech.com	avatar_01	ROLE_SPLITER	END
 shengkejingyan	123456	生科精研分析	123@capitalbiotech.com	avatar_01	ROLE_SPLITER	END
 annuoyouda	123456	安诺优达	jieliu4@capitalbiotech.com	avatar_01	ROLE_SPLITER	END
 mingdeshengwu	123456	明德生物	jieliu6@capitalbiotech.com	avatar_01	ROLE_SPLITER	END
-xuexiao	123456	肖雪	xuexiao@capitalbiotech.com	avatar_01	ROLE_USER	END
-suweizhang	123456	张素维	suweizhang@capitalbiotech.com	avatar_01	ROLE_USER,ROLE_SUPERVISOR	END
-jiaojiaowang	123456	王姣姣	jiaojiaowang@capitalbiotech.com	avatar_01	ROLE_USER,ROLE_SUPERVISOR	END
-xiaofengliu	123456	刘小凤	xiaofengliu@capitalbiotech.com	avatar_01	ROLE_USER	END
-xiaoxuefeng	123456	逄晓雪	xiaoxuefeng@capitalbiotech.com	avatar_01	ROLE_USER	END
-yangli	123456	李阳	yangli@capitalbiotech.com	avatar_06	ROLE_USER	END
+xuexiao	123456	肖雪	xuexiao1@capitalbiotech.com	avatar_01	ROLE_USER	END
+suweizhang	123456	张素维	suweizhang1@capitalbiotech.com	avatar_01	ROLE_USER,ROLE_SUPERVISOR	END
+jiaojiaowang	123456	王姣姣	jiaojiaowang1@capitalbiotech.com	avatar_01	ROLE_USER,ROLE_SUPERVISOR	END
+xiaofengliu	123456	刘小凤	xiaofengliu1@capitalbiotech.com	avatar_01	ROLE_USER	END
+xiaoxuefeng	123456	逄晓雪	xiaoxuefeng1@capitalbiotech.com	avatar_01	ROLE_USER	END
+yangli	123456	李阳	yangli1@capitalbiotech.com	avatar_06	ROLE_USER	END
 danwu	123456	吴丹	danwu@capitalbiotech.com	avatar_01	ROLE_USER,ROLE_ANALYST	END
 yajingwang	123456	王亚静	yajingwang@capitalbiotech.com	avatar_01	ROLE_USER,ROLE_ANALYST	END
 chunyangji	123456	冀春阳	chunyangji@capitalbiotech.com	avatar_13	ROLE_USER,ROLE_ANALYST	END
@@ -39,10 +39,10 @@ shufan	123456	樊淑	shufan@capitalbiotech.com	avatar_01	ROLE_USER,ROLE_ANALYST	
 yunfengzhang	123456	张云峰	yunfengzhang@capitalbiotech.com	avatar_13	ROLE_USER,ROLE_ANALYST	END
 jundong	123456	董俊	jundong@capitalbiotech.com	avatar_13	ROLE_USER,ROLE_ANALYST	END
 yalingwu	123456	吴亚玲	yalingwu@capitalbiotech.com	avatar_01	ROLE_USER,ROLE_ANALYST,ROLE_SELLER	END
-tianlima	123456	马天利	tianlima@capitalbiotech.com	avatar_06	ROLE_USER	END
+tianlima	123456	马天利	tianlima1@capitalbiotech.com	avatar_06	ROLE_USER	END
 dunchen	123456	陈盾	dunchen@capitalbiotech.com	avatar_13	ROLE_USER	END
-ligangdeng	123456	邓立刚	ligangdeng@capitalbiotech.com	avatar_13	ROLE_USER,ROLE_SUPERVISOR	END
-yiruiwang	123456	王怡瑞	yiruiwang@capitalbiotech.com	avatar_13	ROLE_USER	END
+ligangdeng	123456	邓立刚	ligangdeng1@capitalbiotech.com	avatar_13	ROLE_USER,ROLE_SUPERVISOR	END
+yiruiwang	123456	王怡瑞	yiruiwang@1capitalbiotech.com	avatar_13	ROLE_USER,ROLE_SUPERVISOR	END
 
 
 

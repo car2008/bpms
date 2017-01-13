@@ -1,10 +1,26 @@
 <%@ page import="com.capitalbiotech.bpms.Worktime" %>
+<g:set var="today" value="${formatDate(format:'yyyy-MM-dd', date:new Date())}" />
+<g:set var="finishedDate" value="${worktimeInstance?.finishedDate != null ? formatDate(date: worktimeInstance?.finishedDate, format: 'yyyy-MM-dd') : today}"/>
 <g:set var="projectId" value="${projectInstance.id}" />
-<div class="control-group ${hasErrors(bean: projectInstance, field: 'contract', 'error')}">
+<style>
+	body{
+		padding-top:0px;
+		padding-bottom:0px;
+	}
+	input.formControl{
+		width:220px;
+		height:30px;
+	}
+	textarea.formTextarea{
+		width:800px;
+		height:180px;
+	}
+</style>
+<div class="control-group ${hasErrors(bean: projectInstance, field: 'contract', 'error')}" style="display:none;">
 	<label class="control-label" for="contract"><g:message code="project.contract.label" /></label>
 	<div class="controls">
-		<input type="text" id="contract" name="contract" readonly="readonly" value="${projectInstance?.contract}"/>
-		<span class="help-inline"><g:message code="required.label" /></span>
+		<input type="text" id="contract" class="formControl" name="contract" readonly="readonly" value="${projectInstance?.contract}"/>
+		<span class="help-inline"></span>
 	</div>
 </div>
 <div class="control-group ${hasErrors(bean: projectInstance, field: 'platforms', 'error')}">
@@ -15,6 +31,7 @@
 				<option value="${platformInstance?.id}" ${projectInstance?.platforms?.collect{it.id}?.contains(platformInstance.id) ? 'selected' : ''} >${platformInstance?.title}</option>
 			</g:each>
 		</select>
+		<span class="help-inline">自动填写</span>
 	</div>
 </div>
 <div class="control-group ${hasErrors(bean: worktimeInstance, field: 'workcontents', 'error')}">
@@ -23,6 +40,16 @@
 		<select id="workcontents" name="workcontents" data-placeholder=" ">
 			<g:each in="${workcontentInstanceList}" var="workcontentInstance">
 				<option value="${workcontentInstance?.id}" ${worktimeInstance?.workcontents?.collect{it.id}?.contains(workcontentInstance.id) ? 'selected' : ''}>${workcontentInstance?.title}</option>
+			</g:each>
+		</select>
+	</div>
+</div>
+<div class="control-group ${hasErrors(bean: worktimeInstance, field: 'completers', 'error')}">
+	<label class="control-label" for="completers"><g:message code="worktime.completers.label" /></label>
+	<div class="controls">
+		<select id="completers" name="completers" multiple data-placeholder=" ">
+			<g:each in="${analystInstanceList}" var="analystInstance">
+				<option value="${analystInstance?.id}" ${worktimeInstance?.completers?.collect{it.id}?.contains(analystInstance.id) ? 'selected' : ''}  ${disabledValue}>${analystInstance?.name}</option>
 			</g:each>
 		</select>
 	</div>
@@ -43,25 +70,25 @@
 	<label class="control-label" for="finishedDate"><g:message
 				code="worktime.finishedDate.label" /></label>
 	<div class="controls">
-		<input type="text" name="finishedDate" id="finishedDate" data-date="${finishedDate}" data-date-format="yyyy-mm-dd" value="${finishedDate}" />
+		<input type="text" name="finishedDate" class="formControl" id="finishedDate" data-date="${finishedDate}" data-date-format="yyyy-mm-dd" value="${finishedDate}" />
 	</div>
 </div>
 <div class="control-group ${hasErrors(bean: worktimeInstance, field: 'manHour', 'error')}">
 	<label class="control-label" for="manHour"><g:message code="worktime.manHour.label" /></label>
 	<div class="controls">
-		<input type="text" name="manHour" id="manHour" value="${worktimeInstance?.manHour}" />
+		<input type="text" name="manHour" class="formControl" id="manHour" value="${worktimeInstance?.manHour}" />
 	</div>
 </div>
 <div class="control-group ${hasErrors(bean: worktimeInstance, field: 'machineHour', 'error')}">
 	<label class="control-label" for="machineHour"><g:message code="worktime.machineHour.label" /></label>
 	<div class="controls">
-		<input type="text" name="machineHour" id="machineHour" value="${worktimeInstance?.machineHour}" />
+		<input type="text" name="machineHour" class="formControl" id="machineHour" value="${worktimeInstance?.machineHour}" />
 	</div>
 </div>
 <div class="control-group ${hasErrors(bean: worktimeInstance, field: 'comment2', 'error')}">
 	<label class="control-label" for="comment2"><g:message code="worktime.comment2.label" /></label>
 	<div class="controls">
-		<textarea rows="5" cols="20" name="comment2" id="comment2" style= "resize:none; ">${worktimeInstance?.comment2}</textarea>
+		<textarea  name="comment2" id="comment2"  class="formTextarea" style= "resize:none; ">${worktimeInstance?.comment2}</textarea>
 	</div>
 </div>
 <script type="text/javascript">
@@ -75,5 +102,6 @@ $(function(){
 	});
 	$("#platforms").chosen({});
 	$("#workcontents").chosen({});
+	$("#completers").chosen({});
 });
 </script>

@@ -13,6 +13,7 @@
 }
 #worktimeTable th{
 	border:1px solid #999999;
+	white-space: nowrap; 
 }
 .wrap{ 
    display: block; 

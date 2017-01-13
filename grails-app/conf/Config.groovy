@@ -164,23 +164,37 @@ environments {
 		
 		example.dir.root = "C:/Users/czp/examples/example/static"
 		example.dir.backup = "${example.dir.root}/backup"
-		example.backup.cmd = "D:/chengzhipeng/soft-2/mysql-5.1/bin/mysqldump -uroot -proot bpms_dev"
+		example.backup.cmd = "D:/chengzhipeng/soft-2/mysql-5.1/bin/mysqldump -uroot -proot bpms_czp"
 		example.restore.cmd1 = "mysql -uroot -proot"
-		example.restore.cmd2 = "use bpms_dev;"
+		example.restore.cmd2 = "use bpms_czp;"
 		example.restore.cmd3 = "source "
+		
+		workday.holiday.file = "D:\\shiyanshuju\\workday-holiday\\2017.txt"
+		
+		project.file.upload.path="D:\\shiyanshuju\\bpms-project-upload"
 		
     }
     production {
         grails.logging.jul.usebridge = false
-        grails.serverURL = "http://192.168.2.236:8080/bpms"
+        grails.serverURL = "http://cloud.capitalbiotech.com/bpms"
         
-        bpms.static.directory.root = "/var/lib/tomcat/webapps/bpms/static"
+        bpms.static.directory.root = "/data/bpmsczp/static"
         bpms.user.avatar.default = "${bpms.static.directory.root}/avatar_default.png"
         bpms.user.avatar.directory = "${bpms.static.directory.root}/avatars"
 		
-		example.dir.root = "C:/example/static"
+		/*example.dir.root = "C:/example/static"
 		example.dir.backup = "${example.dir.root}/backup"
 		example.backup.cmd = "C:/xampp/mysql/bin/mysqldump -uroot -proot bpms_dev"
-		example.restore.cmd = "C:/xampp/mysql/bin/mysql -uroot -proot bpms_dev"
+		example.restore.cmd = "C:/xampp/mysql/bin/mysql -uroot -proot bpms_dev"*/
+		example.dir.root = "/data/bpmsczp"
+		example.dir.backup = "${example.dir.root}/backupfile"
+		example.backup.cmd = "mysqldump -uroot -p bpms_czp"
+		example.restore.cmd1 = "mysql -uroot -p"
+		example.restore.cmd2 = "use bpms_czp;"
+		example.restore.cmd3 = "source "
+		
+		workday.holiday.file = "/data/bpmsczp/workday-holiday/2017.txt"
+		
+		project.file.upload.path="/data/bpmsczp/bpms-project-upload"
     }
 }

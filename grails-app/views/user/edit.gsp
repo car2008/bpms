@@ -65,6 +65,12 @@
 						</div>
 					</div>
 					<sec:ifAnyGranted roles="ROLE_ADMIN">
+						<div class="control-group ${hasErrors(bean: userInstance, field: 'avatar', 'error')}">
+							<label class="control-label" for="avatar"><g:message code="user.avatar.label" /></label>
+							<div class="controls">
+									<input name="avatar" value="${userInstance?.avatar}" />
+							</div>
+						</div>
 						<div class="control-group ${hasErrors(bean: userInstance, field: 'roles', 'error')}">
 							<label class="control-label" for="roles"><g:message code="user.roles.label" default="Roles" /></label>
 							<div class="controls">
@@ -83,6 +89,12 @@
 									name="authority" value="ROLE_ANALYST"
 									${authorities?.contains('ROLE_ANALYST') ? 'checked' : ''}>
 									<g:message code="role.authority.ROLE_ANALYST.label" />
+								</label>
+								<br />
+								<label class="checkbox inline"> <input type="checkbox"
+									name="authority" value="ROLE_EXAMINER"
+									${authorities?.contains('ROLE_EXAMINER') ? 'checked' : ''}>
+									<g:message code="role.authority.ROLE_EXAMINER.label" />
 								</label>
 								<br />
 								<label class="checkbox inline"> <input type="checkbox"

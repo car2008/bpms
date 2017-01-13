@@ -8,7 +8,18 @@
 #worktimeTable tr{
 	border-bottom:1px solid #999999;
 }
+.pagination ul li.disabled{ 
+   display:none; 
+} 
 
+.pagination a{ 
+   border:1px solid #dddddd; 
+   padding:6px 5px 6px 5px; 
+   line-height:30px; 
+}
+#worktimeTable th,td{ 
+   white-space: nowrap; 
+}
 </style>
 <script type="text/javascript">
 $(function(){
@@ -67,7 +78,7 @@ $(function(){
 					  ~ <span><input type="text" name="endSearchDate" id="endSearchDate" value="${endSearchDate}" style="width:75px;" onchange="searchDate(this.id)"/></span>
 					</td>
 					<td>
-			        	<input id="q2" name="q2" type="text" class="form-control"  style="width:55px;" value="${params.q2}" onchange="search(this.id)"/>
+			        	<input id="q2" name="q2" type="text" class="form-control"  value="${params.q2}" onchange="search(this.id)"/>
 			        </td>
 			        <td style="width:55px;"></td>
 			        <td></td>
@@ -89,7 +100,7 @@ $(function(){
 						</select>
 		    		</td>
 			    	<td>
-			    		<select id="q6" name="q6" data-index="13" style="width:90px;" onchange="search(this.id)">
+			    		<select id="q6" name="q6" data-index="13" style="width:80px;" onchange="search(this.id)">
 			    			<option value="" selected></option>
 			    			<g:each in="${analystInstanceList}" var="analystInstance">
 								<option value="${analystInstance?.username}" ${analystInstance?.username==params.q6 ? 'selected' : ''}>${analystInstance?.name}</option>
@@ -97,7 +108,7 @@ $(function(){
 			    		</select>
 		    		</td>
 		    		<td>
-		    			<select id="q7" name="q7" data-index="6" style="width:96px;" onchange="search(this.id)">
+		    			<select id="q7" name="q7" data-index="6" style="width:65px;" onchange="search(this.id)">
 			    			<option value="" selected></option>
 			    			<option value="WAY_USUAL" ${"WAY_USUAL".equals(params.q7) ? 'selected' : ''}  >
 								<g:message code="worktime.way.WAY_USUAL.label" />

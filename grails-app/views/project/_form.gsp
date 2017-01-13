@@ -1,310 +1,350 @@
 <%@ page import="com.capitalbiotech.bpms.Project" %>
-<div class="control-group ${hasErrors(bean: projectInstance, field: 'contract', 'error')}">
-	<label class="control-label" for="contract"><g:message code="project.contract.label" /></label>
-	<div class="controls">
-		<input type="text" id="contract" name="contract" ${disabledValue} value="${projectInstance?.contract}" onchange="changeInfo()" />
-		<span class="help-inline"><g:message code="required.label" /></span><span id="addContractSpan" style="color:orange;text-align:center"> </span>
+<style>
+	.f_left{
+		float:left;	
+	}
+	.f_right{
+		float:right;
+	}
+	.formLeft{
+		width:33.3%;
+		height:auto;
+		box-sizing:border-box;
+		border-right:1px dashed #ccc;
+	}
+	.form-horizontal .control-group{
+		margin:0 10%;
+		margin-bottom:10px;
+	}
+</style>
+<fieldset class="formContainer" style="margin:0px 1%;">
+	<div class="f_left formLeft">
+		<div class="control-group ${hasErrors(bean: projectInstance, field: 'contract', 'error')}">
+			<label class="control-label" for="contract"><g:message code="project.contract.label" /><span class="help-inline">*</span></label>
+			<div class="controls">
+				<input type="text" id="contract" name="contract" ${disabledValue} value="${projectInstance?.contract}" onchange="changeInfo()" />
+			</div>
+		</div>
+		<div class="control-group">
+			<div class="controls">
+				<span id="addContractSpan" style="color:orange;text-align:center"> </span>
+			</div>
+		</div>
+		<div class="control-group ${hasErrors(bean: projectInstance, field: 'customerUnit', 'error')}">
+			<label class="control-label" for="customerUnit"><g:message code="project.customerUnit.label" /></label>
+			<div class="controls">
+				<input type="text" id="customerUnit" name="customerUnit" ${disabledValue} value="${projectInstance?.customerUnit}" onchange="changeInfo()"/>
+			</div>
+		</div>
+		<div class="control-group ${hasErrors(bean: projectInstance, field: 'customerName', 'error')}">
+			<label class="control-label" for="customerName"><g:message code="project.customerName.label" /></label>
+			<div class="controls">
+				<input type="text" id="customerName" name="customerName" ${disabledValue} value="${projectInstance?.customerName}" onchange="changeInfo()"/>
+			</div>
+		</div>
+		<div class="control-group ${hasErrors(bean: projectInstance, field: 'information', 'error')}">
+			<label class="control-label" for="information"><g:message code="project.information.label" /></label>
+			<div class="controls">
+				<input type="text" size="400" id="information" name="information" readonly="readonly" value="${projectInstance?.information}" />
+			</div>
+		</div>
+		<div class="control-group ${hasErrors(bean: projectInstance, field: 'projectCreateDate', 'error')}">
+			<label class="control-label" for="projectCreateDate"><g:message
+						code="project.projectCreateDate.label" /></label>
+			<div class="controls">
+				<input type="text" name="projectCreateDate" id="projectCreateDate" ${disabledValue} data-date="${projectCreateDate}" data-date-format="yyyy-mm-dd" value="${projectCreateDate}" />
+			</div>
+		</div>
+		<div class="control-group ${hasErrors(bean: projectInstance, field: 'level', 'error')}">
+			<label class="control-label" for="level"><g:message code="project.level.label" /></label>
+			<div class="controls">
+				<select id="level" name="level">
+					<g:each in="${Project.constraints.level.inList}" var="level">
+						<option value="${level}" ${projectInstance?.level == level ? 'selected' : ''} ${disabledValue} >
+							<g:message code="project.level.${level}.label" />
+						</option>
+					</g:each>
+				</select>
+			</div>
+		</div>
+		<div class="control-group ${hasErrors(bean: projectInstance, field: 'platforms', 'error')}">
+			<label class="control-label" for="platforms"><g:message code="platform.label" /></label>
+			<div class="controls">
+				<select id="platforms" name="platforms" multiple data-placeholder=" ">
+					<g:each in="${platformInstanceList}" var="platformInstance">
+						<option value="${platformInstance?.id}" ${projectInstance?.platforms?.collect{it.id}?.contains(platformInstance.id) ? 'selected' : ''}  ${disabledValue}>${platformInstance?.title}</option>
+					</g:each>
+				</select>
+			</div>
+		</div>
+		<div class="control-group ${hasErrors(bean: projectInstance, field: 'experiments', 'error')}">
+			<label class="control-label" for="experiments"><g:message code="experiment.label" /></label>
+			<div class="controls">
+				<select id="experiments" name="experiments" multiple data-placeholder=" ">
+					<g:each in="${experimentInstanceList}" var="experimentInstance">
+						<option value="${experimentInstance?.id}" ${projectInstance?.experiments?.collect{it.id}?.contains(experimentInstance.id) ? 'selected' : ''}  ${disabledValue}>${experimentInstance?.title}</option>
+					</g:each>
+				</select>
+			</div>
+		</div>
+		<div class="control-group ${hasErrors(bean: projectInstance, field: 'species', 'error')}">
+			<label class="control-label" for="species"><g:message code="project.species.label" /></label>
+			<div class="controls">
+				<input type="text" name="species" id="species" ${disabledValue} value="${projectInstance?.species}" />
+			</div>
+		</div>
+		<div class="control-group ${hasErrors(bean: projectInstance, field: 'samplesize', 'error')}">
+			<label class="control-label" for="samplesize"><g:message code="project.samplesize.label" /></label>
+			<div class="controls">
+				<input type="text" name="samplesize" id="samplesize" ${disabledValue} value="${projectInstance?.samplesize}" />
+			</div>
+		</div>
+		<div class="control-group ${hasErrors(bean: projectInstance, field: 'batch', 'error')}">
+			<label class="control-label" for="batch"><g:message code="project.batch.label" /></label>
+			<div class="controls">
+				<input type="text" name="batch" id="batch" ${disabledValue} value="${projectInstance?.batch}" />
+			</div>
+		</div>
+		<div class="control-group ${hasErrors(bean: projectInstance, field: 'libraryBuildWay', 'error')}">
+			<label class="control-label" for="libraryBuildWay"><g:message code="project.libraryBuildWay.label" /></label>
+			<div class="controls">
+				<select id="libraryBuildWay" name="libraryBuildWay" >
+					<g:each in="${Project.constraints.libraryBuildWay.inList}" var="libraryBuildWay">
+						<option value="${libraryBuildWay}" ${projectInstance?.libraryBuildWay == libraryBuildWay ? 'selected' : ''} ${disabledValue}>
+							<g:message code="project.way.${libraryBuildWay}.label" />
+						</option>
+					</g:each>
+				</select>
+			</div>
+		</div>
+		<div class="control-group ${hasErrors(bean: projectInstance, field: 'readLength', 'error')}">
+			<label class="control-label" for="readLength"><g:message code="project.readLength.label" /></label>
+			<div class="controls">
+				<input type="text" name="readLength" id="readLength" ${disabledValue} value="${projectInstance?.readLength}" />
+			</div>
+		</div>
+		<div class="control-group ${hasErrors(bean: projectInstance, field: 'readsNum', 'error')}">
+			<label class="control-label" for="readsNum"><g:message code="project.readsNum.label" /></label>
+			<div class="controls">
+				<input type="text" name="readsNum" id="readsNum" ${disabledValue} value="${projectInstance?.readsNum}" />
+			</div>
+		</div>
+		<div class="control-group ${hasErrors(bean: projectInstance, field: 'dataSize', 'error')}">
+			<label class="control-label" for="dataSize"><g:message code="project.dataSize.label" /></label>
+			<div class="controls">
+				<input type="text" name="dataSize" id="dataSize" ${disabledValue} value="${projectInstance?.dataSize}" />
+			</div>
+		</div>
 	</div>
-</div>
-<div class="control-group ${hasErrors(bean: projectInstance, field: 'customerUnit', 'error')}">
-	<label class="control-label" for="customerUnit"><g:message code="project.customerUnit.label" /></label>
-	<div class="controls">
-		<input type="text" id="customerUnit" name="customerUnit" ${disabledValue} value="${projectInstance?.customerUnit}" onchange="changeInfo()"/>
-		<span class="help-inline"><g:message code="required.label" /></span>
+	<div class="f_left formLeft">
+		<div class="control-group ${hasErrors(bean: projectInstance, field: 'analyses', 'error')}">
+			<label class="control-label" for="analyses"><g:message code="analysis.label" /></label>
+			<div class="controls">
+				<select id="analyses" name="analyses" multiple data-placeholder=" ">
+					<g:each in="${analysisInstanceList}" var="analysisInstance">
+						<option value="${analysisInstance?.id}" ${projectInstance?.analyses?.collect{it.id}?.contains(analysisInstance.id) ? 'selected' : ''}  ${disabledValue}>${analysisInstance?.title}</option>
+					</g:each>
+				</select>
+			</div>
+		</div>
+		<div class="control-group ${hasErrors(bean: projectInstance, field: 'supervisors', 'error')}">
+			<label class="control-label" for="supervisors"><g:message code="project.supervisors.label" /></label>
+			<div class="controls">
+				<select id="supervisors" name="supervisors" multiple data-placeholder=" ">
+					<g:each in="${supervisorInstanceList}" var="supervisorInstance">
+						<option value="${supervisorInstance?.id}" ${projectInstance?.supervisors?.collect{it.id}?.contains(supervisorInstance.id) ? 'selected' : ''}  ${disabledValue}>${supervisorInstance?.name}</option>
+					</g:each>
+				</select>
+			</div>
+		</div>
+		<div class="control-group ${hasErrors(bean: projectInstance, field: 'analysts', 'error')}">
+			<label class="control-label" for="analysts"><g:message code="project.analysts.label" /><span class="help-inline">*</span></label>
+			<div class="controls">
+				<select id="analysts" name="analysts" multiple data-placeholder=" ">
+					<g:each in="${analystInstanceList}" var="analystInstance">
+						<option value="${analystInstance?.id}" ${projectInstance?.analysts?.collect{it.id}?.contains(analystInstance.id) ? 'selected' : ''}  ${disabledValue}>${analystInstance?.name}</option>
+					</g:each>
+				</select>
+			</div>
+		</div>
+		<div class="control-group ${hasErrors(bean: projectInstance, field: 'examiners', 'error')}">
+			<label class="control-label" for="examiners"><g:message code="project.examiners.label" /></label>
+			<div class="controls">
+				<select id="examiners" name="examiners" multiple data-placeholder=" ">
+					<g:each in="${examinerInstanceList}" var="examinerInstance">
+						<option value="${examinerInstance?.id}" ${projectInstance?.examiners?.collect{it.id}?.contains(examinerInstance.id) ? 'selected' : ''}  ${disabledValue}>${examinerInstance?.name}</option>
+					</g:each>
+				</select>
+			</div>
+		</div>
+		<div class="control-group ${hasErrors(bean: projectInstance, field: 'spliters', 'error')}">
+			<label class="control-label" for="spliters"><g:message code="project.spliters.label" /></label>
+			<div class="controls">
+				<select id="spliters" name="spliters" multiple data-placeholder=" ">
+					<g:each in="${spliterInstanceList}" var="spliterInstance">
+						<option value="${spliterInstance?.id}" ${projectInstance?.spliters?.collect{it.id}?.contains(spliterInstance.id) ? 'selected' : ''}  ${disabledValue}>${spliterInstance?.name}</option>
+					</g:each>
+				</select>
+			</div>
+		</div>
+		<div class="control-group ${hasErrors(bean: projectInstance, field: 'dueTime', 'error')}">
+			<label class="control-label" for="dueTime"><g:message
+						code="project.dueTime.label" /></label>
+			<div class="controls">
+				<input type="text" name="dueTime" id="dueTime" ${disabledValue} style="width:150px;" data-date="${dueTime}" data-date-format="yyyy-mm-dd" value="${dueTime}" />
+				<input type="text" name="dueTimeNum" id="dueTimeNum" maxlength="3" onchange="transNumToDate(this.id)" style="width:30px;"/>
+			</div>
+		</div>
+		<div class="control-group ${hasErrors(bean: projectInstance, field: 'innerDueDate', 'error')}">
+			<label class="control-label" for="innerDueDate"><g:message
+						code="project.innerDueDate.label" /></label>
+			<div class="controls">
+				<input type="text" name="innerDueDate" id="innerDueDate" ${disabledValue} style="width:150px;" data-date="${innerDueDate}" data-date-format="yyyy-mm-dd" value="${innerDueDate}" />
+				<input type="text" name="innerDueTimeNum" id="innerDueTimeNum" maxlength="3" onchange="transNumToDate(this.id)" style="width:30px;"/>
+			</div>
+		</div>
+		<div class="control-group ${hasErrors(bean: projectInstance, field: 'status', 'error')}">
+			<label class="control-label" for="status"><g:message code="project.status.label" /></label>
+			<div class="controls">
+				<select id="status" name="status">
+					<g:each in="${projectInstance.followingStatus}" var="status">
+						<option value="${status}" ${projectInstance?.status == status ? 'selected' : ''} ${disabledValue} >
+							<g:message code="project.status.${status}.label" />
+						</option>
+					</g:each>
+				</select>
+			</div>
+		</div>
+		<div class="control-group ${hasErrors(bean: projectInstance, field: 'k3number', 'error')}">
+			<label class="control-label" for="k3number"><g:message code="project.k3number.label" /></label>
+			<div class="controls">
+				<input type="text" name="k3number" id="k3number" ${disabledValue} value="${projectInstance?.k3number}" />
+			</div>
+		</div>
+		<div class="control-group ${hasErrors(bean: projectInstance, field: 'salesman', 'error')}">
+			<label class="control-label" for="salesman"><g:message code="project.salesman.label" /></label>
+			<div class="controls">
+				<input type="text" name="salesman" id="salesman" ${disabledValue} value="${projectInstance?.salesman}" />
+			</div>
+		</div>
+		<div class="control-group ${hasErrors(bean: projectInstance, field: 'analyStartDate', 'error')}">
+			<label class="control-label" for="analyStartDate"><g:message
+						code="project.analyStartDate.label" /></label>
+			<div class="controls">
+				<input type="text" name="analyStartDate" id="analyStartDate" ${disabledValue} data-date="${analyStartDate}" data-date-format="yyyy-mm-dd" value="${analyStartDate}" />
+			</div>
+		</div>
+		<div class="control-group ${hasErrors(bean: projectInstance, field: 'analySendDate', 'error')}">
+			<label class="control-label" for="analySendDate"><g:message
+						code="project.analySendDate.label" /></label>
+			<div class="controls">
+				<input type="text" name="analySendDate" id="analySendDate" ${disabledValue} data-date="${analySendDate}" data-date-format="yyyy-mm-dd" value="${analySendDate}" />
+			</div>
+		</div>
+		<div class="control-group ${hasErrors(bean: projectInstance, field: 'analySendWay', 'error')}">
+			<label class="control-label" for="analySendWay"><g:message code="project.analySendWay.label" /></label>
+			<div class="controls">
+				<select id="analySendWay" name="analySendWay" >
+					<g:each in="${Project.constraints.analySendWay.inList}" var="analySendWay">
+						<option value="${analySendWay}" ${projectInstance?.analySendWay == analySendWay ? 'selected' : ''} ${disabledValue}>
+							<g:message code="project.way.${analySendWay}.label" />
+						</option>
+					</g:each>
+				</select>
+			</div>
+		</div>
 	</div>
-</div>
-<div class="control-group ${hasErrors(bean: projectInstance, field: 'customerName', 'error')}">
-	<label class="control-label" for="customerName"><g:message code="project.customerName.label" /></label>
-	<div class="controls">
-		<input type="text" id="customerName" name="customerName" ${disabledValue} value="${projectInstance?.customerName}" onchange="changeInfo()"/>
-		<span class="help-inline"><g:message code="required.label" /></span>
+	
+	<div class="f_left formLeft">
+		<div class="control-group ${hasErrors(bean: projectInstance, field: 'metaSendData', 'error')}">
+			<label class="control-label" for="metaSendData"><g:message
+						code="project.metaSendData.label" /></label>
+			<div class="controls">
+				<input type="text" name="metaSendData" id="metaSendData" ${disabledValue} data-date="${metaSendData}" data-date-format="yyyy-mm-dd" value="${metaSendData}" />
+			</div>
+		</div>
+		<div class="control-group ${hasErrors(bean: projectInstance, field: 'metaSendWay', 'error')}">
+			<label class="control-label" for="metaSendWay"><g:message code="project.metaSendWay.label" /></label>
+			<div class="controls">
+				<select id="metaSendWay" name="metaSendWay" >
+					<g:each in="${Project.constraints.metaSendWay.inList}" var="metaSendWay">
+						<option value="${metaSendWay}" ${projectInstance?.metaSendWay == metaSendWay ? 'selected' : ''} ${disabledValue}>
+							<g:message code="project.way.${metaSendWay}.label" />
+						</option>
+					</g:each>
+				</select>
+			</div>
+		</div>
+		<div class="control-group ${hasErrors(bean: projectInstance, field: 'fileName', 'error')}">
+			<label class="control-label" for="fileName"><g:message code="project.fileName.label" /></label>
+			<div class="controls">
+				<span><input type="text" name="fileRealName" id="fileRealName" readonly value="${fileRealName}" style="background-color:transparent;"/></span><span><input type="file" name="myFile" id="myFile" ${disabledValue} onchange="selectFile(this)"/></span>
+				<span><g:hiddenField name="fileName" id="fileName" value="${projectInstance?.fileName}" /></span>
+			</div>
+		</div>
+		<div class="control-group ${hasErrors(bean: projectInstance, field: 'manHour', 'error')}" style="display:none;">
+			<label class="control-label" for="manHour"><g:message code="project.manHour.label" /></label>
+			<div class="controls">
+				<input type="text" name="manHour" id="manHour" readOnly value="${projectInstance?.manHour}" />
+			</div>
+		</div>
+		<div class="control-group ${hasErrors(bean: projectInstance, field: 'machineHour', 'error')}" style="display:none;">
+			<label class="control-label" for="machineHour"><g:message code="project.machineHour.label" /></label>
+			<div class="controls">
+				<input type="text" name="machineHour" id="machineHour" readOnly value="${projectInstance?.machineHour}" />
+			</div>
+		</div>
+		<div class="control-group ${hasErrors(bean: projectInstance, field: 'overdueReason', 'error')}">
+			<label class="control-label" for="overdueReason"><g:message code="project.overdueReason.label" /></label>
+			<div class="controls">
+				<input type="text" name="overdueReason" id="overdueReason" ${disabledValue} value="${projectInstance?.overdueReason}" />
+			</div>
+		</div>
+		<div class="control-group ${hasErrors(bean: projectInstance, field: 'backupDate', 'error')}">
+			<label class="control-label" for="backupDate"><g:message
+						code="project.backupDate.label" /></label>
+			<div class="controls">
+				<input type="text" name="backupDate" id="backupDate" ${disabledValue} data-date="${backupDate}" data-date-format="yyyy-mm-dd" value="${backupDate}" />
+			</div>
+		</div>
+		<div class="control-group ${hasErrors(bean: projectInstance, field: 'backupLocation', 'error')}">
+			<label class="control-label" for="backupLocation"><g:message code="project.backupLocation.label" /></label>
+			<div class="controls">
+				<input type="text" name="backupLocation" id="backupLocation" ${disabledValue} value="${projectInstance?.backupLocation}" />
+			</div>
+		</div>
+		<div class="control-group ${hasErrors(bean: projectInstance, field: 'isRemoted', 'error')}">
+			<label class="control-label" for="isRemoted"><g:message code="project.isRemoted.label" /></label>
+			<div class="controls">
+				<input type="radio" name="isRemoted" id="isRemoted" ${disabledValue} value="true"  ${projectInstance?.isRemoted == true ? 'checked' : ''} />是
+				<input type="radio" name="isRemoted" id="isRemoted" ${disabledValue} value="false" ${projectInstance?.isRemoted == false ? 'checked' : ''} />否
+			</div>
+		</div>
+		<div class="control-group ${hasErrors(bean: projectInstance, field: 'comment1', 'error')}">
+			<label class="control-label" for="comment1"><g:message code="project.comment1.label" /></label>
+			<div class="controls">
+				<textarea rows="5" cols="20" name="comment1" id="comment1" ${disabledValue} style= "resize:none;">${projectInstance?.comment1}</textarea>
+			</div>
+		</div>
+		<div class="control-group ${hasErrors(bean: projectInstance, field: 'sellers', 'error')}">
+			<label class="control-label" for="sellers"><g:message code="project.sellers.label" /></label>
+			<div class="controls">
+				<select id="sellers" name="sellers" multiple data-placeholder=" ">
+					<g:each in="${sellerInstanceList}" var="sellerInstance">
+						<option value="${sellerInstance?.id}" ${projectInstance?.sellers?.collect{it.id}?.contains(sellerInstance.id) ? 'selected' : ''}  ${disabledValue}>${sellerInstance?.name}</option>
+					</g:each>
+				</select>
+			</div>
+		</div>
+		<div class="control-group ${hasErrors(bean: projectInstance, field: 'isControled', 'error')}">
+			<label class="control-label" for="isControled"><g:message code="project.isControled.label" /></label>
+			<div class="controls">
+				<input type="radio" name="isControled" id="isControled" ${disabledValue} value="true" ${projectInstance?.isControled == true ? 'checked' : ''} />是
+				<input type="radio" name="isControled" id="isControled" ${disabledValue} value="false" ${projectInstance?.isControled == false ? 'checked' : ''} />否
+			</div>
+		</div>
 	</div>
-</div>
-<div class="control-group ${hasErrors(bean: projectInstance, field: 'information', 'error')}">
-	<label class="control-label" for="information"><g:message code="project.information.label" /></label>
-	<div class="controls">
-		<input type="text" size="400" id="information" name="information" readonly="readonly" value="${projectInstance?.information}" /><span class="help-inline"><g:message code="format.required.label" /></span>
-	</div>
-</div>
-<div class="control-group ${hasErrors(bean: projectInstance, field: 'projectCreateDate', 'error')}">
-	<label class="control-label" for="projectCreateDate"><g:message
-				code="project.projectCreateDate.label" /></label>
-	<div class="controls">
-		<input type="text" name="projectCreateDate" id="projectCreateDate" ${disabledValue} data-date="${projectCreateDate}" data-date-format="yyyy-mm-dd" value="${projectCreateDate}" />
-	</div>
-</div>
-<div class="control-group ${hasErrors(bean: projectInstance, field: 'dueTime', 'error')}">
-	<label class="control-label" for="dueTime"><g:message
-				code="project.dueTime.label" /></label>
-	<div class="controls">
-		<input type="text" name="dueTime" id="dueTime" ${disabledValue} data-date="${dueTime}" data-date-format="yyyy-mm-dd" value="${dueTime}" />
-	</div>
-</div>
-<div class="control-group ${hasErrors(bean: projectInstance, field: 'innerDueDate', 'error')}">
-	<label class="control-label" for="innerDueDate"><g:message
-				code="project.innerDueDate.label" /></label>
-	<div class="controls">
-		<input type="text" name="innerDueDate" id="innerDueDate" ${disabledValue} data-date="${innerDueDate}" data-date-format="yyyy-mm-dd" value="${innerDueDate}" />
-	</div>
-</div>
-<div class="control-group ${hasErrors(bean: projectInstance, field: 'level', 'error')}">
-	<label class="control-label" for="level"><g:message code="project.level.label" /></label>
-	<div class="controls">
-		<select id="level" name="level">
-			<g:each in="${Project.constraints.level.inList}" var="level">
-				<option value="${level}" ${projectInstance?.level == level ? 'selected' : ''} ${disabledValue} >
-					<g:message code="project.level.${level}.label" />
-				</option>
-			</g:each>
-		</select>
-	</div>
-</div>
-<div class="control-group ${hasErrors(bean: projectInstance, field: 'status', 'error')}">
-	<label class="control-label" for="status"><g:message code="project.status.label" /></label>
-	<div class="controls">
-		<select id="status" name="status">
-			<g:each in="${projectInstance.followingStatus}" var="status">
-				<option value="${status}" ${projectInstance?.status == status ? 'selected' : ''} ${disabledValue} >
-					<g:message code="project.status.${status}.label" />
-				</option>
-			</g:each>
-		</select>
-	</div>
-</div>
-<div class="control-group ${hasErrors(bean: projectInstance, field: 'platforms', 'error')}">
-	<label class="control-label" for="platforms"><g:message code="platform.label" /></label>
-	<div class="controls">
-		<select id="platforms" name="platforms" multiple data-placeholder=" ">
-			<g:each in="${platformInstanceList}" var="platformInstance">
-				<option value="${platformInstance?.id}" ${projectInstance?.platforms?.collect{it.id}?.contains(platformInstance.id) ? 'selected' : ''}  ${disabledValue}>${platformInstance?.title}</option>
-			</g:each>
-		</select>
-	</div>
-</div>
-<div class="control-group ${hasErrors(bean: projectInstance, field: 'experiments', 'error')}">
-	<label class="control-label" for="experiments"><g:message code="experiment.label" /></label>
-	<div class="controls">
-		<select id="experiments" name="experiments" multiple data-placeholder=" ">
-			<g:each in="${experimentInstanceList}" var="experimentInstance">
-				<option value="${experimentInstance?.id}" ${projectInstance?.experiments?.collect{it.id}?.contains(experimentInstance.id) ? 'selected' : ''}  ${disabledValue}>${experimentInstance?.title}</option>
-			</g:each>
-		</select>
-	</div>
-</div>
-<div class="control-group ${hasErrors(bean: projectInstance, field: 'species', 'error')}">
-	<label class="control-label" for="species"><g:message code="project.species.label" /></label>
-	<div class="controls">
-		<input type="text" name="species" id="species" ${disabledValue} value="${projectInstance?.species}" />
-	</div>
-</div>
-<div class="control-group ${hasErrors(bean: projectInstance, field: 'samplesize', 'error')}">
-	<label class="control-label" for="samplesize"><g:message code="project.samplesize.label" /></label>
-	<div class="controls">
-		<input type="text" name="samplesize" id="samplesize" ${disabledValue} value="${projectInstance?.samplesize}" />
-	</div>
-</div>
-<div class="control-group ${hasErrors(bean: projectInstance, field: 'k3number', 'error')}">
-	<label class="control-label" for="k3number"><g:message code="project.k3number.label" /></label>
-	<div class="controls">
-		<input type="text" name="k3number" id="k3number" ${disabledValue} value="${projectInstance?.k3number}" />
-	</div>
-</div>
-<div class="control-group ${hasErrors(bean: projectInstance, field: 'batch', 'error')}">
-	<label class="control-label" for="batch"><g:message code="project.batch.label" /></label>
-	<div class="controls">
-		<input type="text" name="batch" id="batch" ${disabledValue} value="${projectInstance?.batch}" />
-	</div>
-</div>
-<div class="control-group ${hasErrors(bean: projectInstance, field: 'analyses', 'error')}">
-	<label class="control-label" for="analyses"><g:message code="analysis.label" /></label>
-	<div class="controls">
-		<select id="analyses" name="analyses" multiple data-placeholder=" ">
-			<g:each in="${analysisInstanceList}" var="analysisInstance">
-				<option value="${analysisInstance?.id}" ${projectInstance?.analyses?.collect{it.id}?.contains(analysisInstance.id) ? 'selected' : ''}  ${disabledValue}>${analysisInstance?.title}</option>
-			</g:each>
-		</select>
-	</div>
-</div>
-<div class="control-group ${hasErrors(bean: projectInstance, field: 'salesman', 'error')}">
-	<label class="control-label" for="salesman"><g:message code="project.salesman.label" /></label>
-	<div class="controls">
-		<input type="text" name="salesman" id="salesman" ${disabledValue} value="${projectInstance?.salesman}" />
-	</div>
-</div>
-<div class="control-group ${hasErrors(bean: projectInstance, field: 'supervisors', 'error')}">
-	<label class="control-label" for="supervisors"><g:message code="project.supervisors.label" /></label>
-	<div class="controls">
-		<select id="supervisors" name="supervisors" multiple data-placeholder=" ">
-			<g:each in="${supervisorInstanceList}" var="supervisorInstance">
-				<option value="${supervisorInstance?.id}" ${projectInstance?.supervisors?.collect{it.id}?.contains(supervisorInstance.id) ? 'selected' : ''}  ${disabledValue}>${supervisorInstance?.name}</option>
-			</g:each>
-		</select>
-	</div>
-</div>
-<div class="control-group ${hasErrors(bean: projectInstance, field: 'analysts', 'error')}">
-	<label class="control-label" for="analysts"><g:message code="project.analysts.label" /></label>
-	<div class="controls">
-		<select id="analysts" name="analysts" multiple data-placeholder=" ">
-			<g:each in="${analystInstanceList}" var="analystInstance">
-				<option value="${analystInstance?.id}" ${projectInstance?.analysts?.collect{it.id}?.contains(analystInstance.id) ? 'selected' : ''}  ${disabledValue}>${analystInstance?.name}</option>
-			</g:each>
-		</select>
-	</div>
-</div>
-<div class="control-group ${hasErrors(bean: projectInstance, field: 'analyStartDate', 'error')}">
-	<label class="control-label" for="analyStartDate"><g:message
-				code="project.analyStartDate.label" /></label>
-	<div class="controls">
-		<input type="text" name="analyStartDate" id="analyStartDate" ${disabledValue} data-date="${analyStartDate}" data-date-format="yyyy-mm-dd" value="${analyStartDate}" />
-	</div>
-</div>
-<div class="control-group ${hasErrors(bean: projectInstance, field: 'analySendDate', 'error')}">
-	<label class="control-label" for="analySendDate"><g:message
-				code="project.analySendDate.label" /></label>
-	<div class="controls">
-		<input type="text" name="analySendDate" id="analySendDate" ${disabledValue} data-date="${analySendDate}" data-date-format="yyyy-mm-dd" value="${analySendDate}" />
-	</div>
-</div>
-<div class="control-group ${hasErrors(bean: projectInstance, field: 'analySendWay', 'error')}">
-	<label class="control-label" for="analySendWay"><g:message code="project.analySendWay.label" /></label>
-	<div class="controls">
-		<select id="analySendWay" name="analySendWay" >
-			<g:each in="${Project.constraints.analySendWay.inList}" var="analySendWay">
-				<option value="${analySendWay}" ${projectInstance?.analySendWay == analySendWay ? 'selected' : ''} ${disabledValue}>
-					<g:message code="project.way.${analySendWay}.label" />
-				</option>
-			</g:each>
-		</select>
-	</div>
-</div>
-<div class="control-group ${hasErrors(bean: projectInstance, field: 'metaSendData', 'error')}">
-	<label class="control-label" for="metaSendData"><g:message
-				code="project.metaSendData.label" /></label>
-	<div class="controls">
-		<input type="text" name="metaSendData" id="metaSendData" ${disabledValue} data-date="${metaSendData}" data-date-format="yyyy-mm-dd" value="${metaSendData}" />
-	</div>
-</div>
-<div class="control-group ${hasErrors(bean: projectInstance, field: 'metaSendWay', 'error')}">
-	<label class="control-label" for="metaSendWay"><g:message code="project.metaSendWay.label" /></label>
-	<div class="controls">
-		<select id="metaSendWay" name="metaSendWay" >
-			<g:each in="${Project.constraints.metaSendWay.inList}" var="metaSendWay">
-				<option value="${metaSendWay}" ${projectInstance?.metaSendWay == metaSendWay ? 'selected' : ''} ${disabledValue}>
-					<g:message code="project.way.${metaSendWay}.label" />
-				</option>
-			</g:each>
-		</select>
-	</div>
-</div>
-<div class="control-group ${hasErrors(bean: projectInstance, field: 'libraryBuildWay', 'error')}">
-	<label class="control-label" for="libraryBuildWay"><g:message code="project.libraryBuildWay.label" /></label>
-	<div class="controls">
-		<select id="libraryBuildWay" name="libraryBuildWay" >
-			<g:each in="${Project.constraints.libraryBuildWay.inList}" var="libraryBuildWay">
-				<option value="${libraryBuildWay}" ${projectInstance?.libraryBuildWay == libraryBuildWay ? 'selected' : ''} ${disabledValue}>
-					<g:message code="project.way.${libraryBuildWay}.label" />
-				</option>
-			</g:each>
-		</select>
-	</div>
-</div>
-<div class="control-group ${hasErrors(bean: projectInstance, field: 'readLength', 'error')}">
-	<label class="control-label" for="readLength"><g:message code="project.readLength.label" /></label>
-	<div class="controls">
-		<input type="text" name="readLength" id="readLength" ${disabledValue} value="${projectInstance?.readLength}" />
-	</div>
-</div>
-<div class="control-group ${hasErrors(bean: projectInstance, field: 'readsNum', 'error')}">
-	<label class="control-label" for="readsNum"><g:message code="project.readsNum.label" /></label>
-	<div class="controls">
-		<input type="text" name="readsNum" id="readsNum" ${disabledValue} value="${projectInstance?.readsNum}" />
-	</div>
-</div>
-<div class="control-group ${hasErrors(bean: projectInstance, field: 'dataSize', 'error')}">
-	<label class="control-label" for="dataSize"><g:message code="project.dataSize.label" /></label>
-	<div class="controls">
-		<input type="text" name="dataSize" id="dataSize" ${disabledValue} value="${projectInstance?.dataSize}" />
-	</div>
-</div>
-<div class="control-group ${hasErrors(bean: projectInstance, field: 'spliters', 'error')}">
-	<label class="control-label" for="spliters"><g:message code="project.spliters.label" /></label>
-	<div class="controls">
-		<select id="spliters" name="spliters" multiple data-placeholder=" ">
-			<g:each in="${spliterInstanceList}" var="spliterInstance">
-				<option value="${spliterInstance?.id}" ${projectInstance?.spliters?.collect{it.id}?.contains(spliterInstance.id) ? 'selected' : ''}  ${disabledValue}>${spliterInstance?.name}</option>
-			</g:each>
-		</select>
-	</div>
-</div>
-
-<div class="control-group ${hasErrors(bean: projectInstance, field: 'fileName', 'error')}">
-	<label class="control-label" for="fileName"><g:message code="project.fileName.label" /></label>
-	<div class="controls">
-		<span><input type="text" name="fileRealName" id="fileRealName" readonly value="${fileRealName}" style="background-color:transparent;"/></span><span><input type="file" name="myFile" id="myFile" ${disabledValue} onchange="selectFile(this)"/></span>
-		<span><g:hiddenField name="fileName" id="fileName" value="${projectInstance?.fileName}" /></span>
-	</div>
-</div>
-<div class="control-group ${hasErrors(bean: projectInstance, field: 'manHour', 'error')}">
-	<label class="control-label" for="manHour"><g:message code="project.manHour.label" /></label>
-	<div class="controls">
-		<input type="text" name="manHour" id="manHour" ${disabledValue} value="${projectInstance?.manHour}" />
-	</div>
-</div>
-<div class="control-group ${hasErrors(bean: projectInstance, field: 'machineHour', 'error')}">
-	<label class="control-label" for="machineHour"><g:message code="project.machineHour.label" /></label>
-	<div class="controls">
-		<input type="text" name="machineHour" id="machineHour" ${disabledValue} value="${projectInstance?.machineHour}" />
-	</div>
-</div>
-<div class="control-group ${hasErrors(bean: projectInstance, field: 'overdueReason', 'error')}">
-	<label class="control-label" for="overdueReason"><g:message code="project.overdueReason.label" /></label>
-	<div class="controls">
-		<input type="text" name="overdueReason" id="overdueReason" ${disabledValue} value="${projectInstance?.overdueReason}" />
-	</div>
-</div>
-<div class="control-group ${hasErrors(bean: projectInstance, field: 'backupDate', 'error')}">
-	<label class="control-label" for="backupDate"><g:message
-				code="project.backupDate.label" /></label>
-	<div class="controls">
-		<input type="text" name="backupDate" id="backupDate" ${disabledValue} data-date="${backupDate}" data-date-format="yyyy-mm-dd" value="${backupDate}" />
-	</div>
-</div>
-<div class="control-group ${hasErrors(bean: projectInstance, field: 'backupLocation', 'error')}">
-	<label class="control-label" for="backupLocation"><g:message code="project.backupLocation.label" /></label>
-	<div class="controls">
-		<input type="text" name="backupLocation" id="backupLocation" ${disabledValue} value="${projectInstance?.backupLocation}" />
-	</div>
-</div>
-<div class="control-group ${hasErrors(bean: projectInstance, field: 'isRemoted', 'error')}">
-	<label class="control-label" for="isRemoted"><g:message code="project.isRemoted.label" /></label>
-	<div class="controls">
-		<input type="radio" name="isRemoted" id="isRemoted" ${disabledValue} value="true"  ${projectInstance?.isRemoted == true ? 'checked' : ''} />是
-		<input type="radio" name="isRemoted" id="isRemoted" ${disabledValue} value="false" ${projectInstance?.isRemoted == false ? 'checked' : ''} />否
-	</div>
-</div>
-<div class="control-group ${hasErrors(bean: projectInstance, field: 'comment1', 'error')}">
-	<label class="control-label" for="comment1"><g:message code="project.comment1.label" /></label>
-	<div class="controls">
-		<textarea rows="5" cols="20" name="comment1" id="comment1" ${disabledValue} style= "resize:none;">${projectInstance?.comment1}</textarea>
-	</div>
-</div>
-<div class="control-group ${hasErrors(bean: projectInstance, field: 'sellers', 'error')}">
-	<label class="control-label" for="sellers"><g:message code="project.sellers.label" /></label>
-	<div class="controls">
-		<select id="sellers" name="sellers" multiple data-placeholder=" ">
-			<g:each in="${sellerInstanceList}" var="sellerInstance">
-				<option value="${sellerInstance?.id}" ${projectInstance?.sellers?.collect{it.id}?.contains(sellerInstance.id) ? 'selected' : ''}  ${disabledValue}>${sellerInstance?.name}</option>
-			</g:each>
-		</select>
-	</div>
-</div>
-<div class="control-group ${hasErrors(bean: projectInstance, field: 'isControled', 'error')}">
-	<label class="control-label" for="isControled"><g:message code="project.isControled.label" /></label>
-	<div class="controls">
-		<input type="radio" name="isControled" id="isControled" ${disabledValue} value="true" ${projectInstance?.isControled == true ? 'checked' : ''} />是
-		<input type="radio" name="isControled" id="isControled" ${disabledValue} value="false" ${projectInstance?.isControled == false ? 'checked' : ''} />否
-	</div>
-</div>
+</fieldset>
 <script type="text/javascript">	
 	$(function(){
 		$('#dueTime').datepicker({
@@ -375,6 +415,7 @@
 		$("#metaSendWay").chosen({});
 		$("#analySendWay").chosen({});
 		$("#spliters").chosen({});
+		$("#examiners").chosen({});
 	});
 	function changeInfo(){
 		var information=document.getElementById('information');
@@ -449,7 +490,7 @@
 		function addSaveNewData(data){  
 		    var po = data.split(" ");
 		    var tr = $("<tr></tr>").attr("bgcolor","#FFFFFF").attr("id","addContractTr");
-	        tr.append($("<td></td>").html("与此合同号相同的项目编号有:"));  
+	        tr.append($("<td></td>").html("与此合同号相同的项目:"));  
 		    for(var i=0;i<po.length;i++){  
 		        var element = po[i];
 		        //console.log(element)  
@@ -512,5 +553,6 @@
 	        }catch(e){  
 	            alert(e);  
 	        }  
-	    } 
+	  } 
+	  
 </script>

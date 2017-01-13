@@ -8,8 +8,7 @@
 	 font-family:"Times New Roman",Georgia,Serif;
 	 line-height:25px;
 	 font-size:15px;
-	 
-	 }
+}
 </style>
 <body style="background-color:F5F5F5;">
 	<table>
